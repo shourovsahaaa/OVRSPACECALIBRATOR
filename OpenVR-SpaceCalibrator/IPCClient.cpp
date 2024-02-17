@@ -3,17 +3,24 @@
 
 #include <string>
 
+std::string WStringToString(const std::wstring& wstr)
+{
+	int size_needed = WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), NULL, 0, NULL, NULL);
+	std::string str_to(size_needed, 0);
+	WideCharToMultiByte(CP_UTF8, 0, &wstr[0], (int)wstr.size(), &str_to[0], size_needed, NULL, NULL);
+	return str_to;
+}
+
 static std::string LastErrorString(DWORD lastError)
 {
-	LPSTR buffer = nullptr;
-	size_t size = FormatMessageA(
+	LPWSTR buffer = nullptr;
+	size_t size = FormatMessageW(
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-		NULL, lastError, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&buffer, 0, NULL
+		NULL, lastError, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPWSTR)&buffer, 0, NULL
 	);
-
-	std::string message(buffer, size);
+	std::wstring message(buffer, size);
 	LocalFree(buffer);
-	return message;
+	return WStringToString(message);
 }
 
 IPCClient::~IPCClient()
@@ -37,7 +44,8 @@ void IPCClient::Connect()
 	DWORD mode = PIPE_READMODE_MESSAGE;
 	if (!SetNamedPipeHandleState(pipe, &mode, 0, 0))
 	{
-		throw std::runtime_error("Couldn't set pipe mode. Error: " + LastErrorString(GetLastError()));
+		DWORD lastError = GetLastError();
+		throw std::runtime_error("Couldn't set pipe mode. Error " + std::to_string(lastError) + ": " + LastErrorString(lastError));
 	}
 
 	auto response = SendBlocking(protocol::Request(protocol::RequestHandshake));
@@ -65,7 +73,8 @@ void IPCClient::Send(const protocol::Request &request)
 	BOOL success = WriteFile(pipe, &request, sizeof request, &bytesWritten, 0);
 	if (!success)
 	{
-		throw std::runtime_error("Error writing IPC request. Error: " + LastErrorString(GetLastError()));
+		DWORD lastError = GetLastError();
+		throw std::runtime_error("Error writing IPC request. Error " + std::to_string(lastError) + ": " + LastErrorString(lastError));
 	}
 }
 
@@ -80,7 +89,7 @@ protocol::Response IPCClient::Receive()
 		DWORD lastError = GetLastError();
 		if (lastError != ERROR_MORE_DATA)
 		{
-			throw std::runtime_error("Error reading IPC response. Error: " + LastErrorString(lastError));
+			throw std::runtime_error("Error reading IPC response. Error " + std::to_string(lastError) + ": " + LastErrorString(lastError));
 		}
 	}
 
