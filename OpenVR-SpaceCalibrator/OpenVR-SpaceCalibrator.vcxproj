@@ -93,7 +93,6 @@
     <ClInclude Include="CalibrationCalc.h" />
     <ClInclude Include="CalibrationMetrics.h" />
     <ClInclude Include="Configuration.h" />
-    <ClInclude Include="ContinuousCalibration.h" />
     <ClInclude Include="EmbeddedFiles.h" />
     <ClInclude Include="IPCClient.h" />
     <ClInclude Include="stdafx.h" />

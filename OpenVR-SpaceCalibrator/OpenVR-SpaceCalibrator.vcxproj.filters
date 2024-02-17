@@ -57,9 +57,6 @@
     <ClInclude Include="..\lib\implot\implot_internal.h">
       <Filter>Source Files\ImGui\ImPlot</Filter>
     </ClInclude>
-    <ClInclude Include="ContinuousCalibration.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="VRState.h">
       <Filter>Header Files</Filter>
     </ClInclude>
