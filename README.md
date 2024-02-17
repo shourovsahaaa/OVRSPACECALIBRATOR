@@ -21,22 +21,46 @@ Once Space Calibrator has a calibration, it works in the background to keep your
 
 ### Calibration
 
+This fork supports continuous calibration. This means that there are two ways to calibrate:
+
+#### 1. Normal Calibration
+
+>  Use this if you do not have a tracker on your VR headset.
+
 As part of first time setup, or when you make a change to your space (e.g. move a sensor), and occasionally as the calibration drifts over time (consumer VR tracking isn't perfectly stable), you'll need to run a calibration:
 
 1. Copy the chaperone/guardian bounds from your HMD's play space. This doesn't need to be run if your HMD's play space hasn't changed since last time you copied it. __Example:__ if you're using the Rift with Vive trackers and you bump a Vive lighthouse, or if the calibration has just drifted a little, you likely don't need to run this step, but if you bump an Oculus sensor you will (after running Oculus guardian setup again).
-    1. Run SteamVR, with only devices from your HMD's tracking system powered on. __Example:__ for Rift with Vive trackers, don't turn on the trackers yet.
-    2. Confirm your chaperone/guardian is set up with the walls in the right place. If you change it later, you need to run step again.
-    3. Open SPACE CAL in the SteamVR dashboard overlay.
-    4. Click `Copy Chaperone Bounds to profile`
+   
+   1. Run SteamVR, with only devices from your HMD's tracking system powered on. __Example:__ for Rift with Vive trackers, don't turn on the trackers yet.
+   2. Confirm your chaperone/guardian is set up with the walls in the right place. If you change it later, you need to run step again.
+   3. Open SPACE CAL in the SteamVR dashboard overlay.
+   4. Click `Copy Chaperone Bounds to profile`
 
 2. Calibrate devices.
-    1. Open SteamVR if you haven't already. Turn on some or all your devices.
-    2. Open SPACE CAL in the SteamVR dashboard overlay.
-    3. Select one device from the reference space on the left and one device from the target space on the right. If you turned on multiple devices from one space and can't tell which one is selected, click "Identify selected devices" to blink an LED or vibrate it. __Example:__ for Rift with Vive trackers, you'll see the Touch controllers on the left, and Vive trackers on the right. __Pro tip:__ if you turn on just one Vive tracker, you don't have to figure out which one is selected.
-    4. Hold these two devices in one hand, like they're glued together. If they slip, calibration won't work as well.
-    5. Click `Start Calibration`
-    6. Move and rotate your hand around slowly a few times, like you're calibrating the compass on your phone. You want to sample as many orientations as possible.
-    7. Done! A profile will be saved automatically. If you haven't already, turn on all your devices. Space Calibrator will automatically apply the calibration to devices as they turn on.
+   
+   1. Open SteamVR if you haven't already. Turn on some or all your devices.
+   2. Open SPACE CAL in the SteamVR dashboard overlay.
+   3. Select one device from the reference space on the left and one device from the target space on the right. If you turned on multiple devices from one space and can't tell which one is selected, click "Identify selected devices" to blink an LED or vibrate it. __Example:__ for Rift with Vive trackers, you'll see the Touch controllers on the left, and Vive trackers on the right. __Pro tip:__ if you turn on just one Vive tracker, you don't have to figure out which one is selected.
+   4. Hold these two devices in one hand, like they're glued together. If they slip, calibration won't work as well.
+   5. Click `Start Calibration`
+   6. Move and rotate your hand around slowly a few times, like you're calibrating the compass on your phone. You want to sample as many orientations as possible.
+   7. Done! A profile will be saved automatically. If you haven't already, turn on all your devices. Space Calibrator will automatically apply the calibration to devices as they turn on.
+
+#### 2. Continuous Calibration
+
+> Use this only if you have a tracker on your VR headset.
+
+Continuous calibration allows you to calibrate playspaces continuously, eliminating the need to do any of the work above.
+
+1. Start SteamVR with the VR headset you wish to use.
+
+2. Turn on **ONLY** the tracker which is attached on the VR headset.
+
+3. Select the VR headset and tracker and calibrate.
+
+4. Turn on your other devices.
+
+5. You should see them line up with you as you after moving around your playspace for a bit for an initial calibration.
 
 ### Calibration outside VR
 
