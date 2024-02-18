@@ -77,7 +77,7 @@ void ShowVersionLine() {
 		ImGui::EndChild();
 		return;
 	}
-	ImGui::Text("OpenVR Space Calibrator v" SPACECAL_VERSION_STRING " - by tach/pushrax/bd_/ArcticFox/hekky");
+	ImGui::Text("OpenVR Space Calibrator v" SPACECAL_VERSION_STRING);
 	if (runningInOverlay)
 	{
 		ImGui::SameLine();
@@ -137,8 +137,24 @@ void BuildContinuousCalDisplay() {
 
 static void ScaledDragFloat(const char* label, double& f, double scale, double min, double max, int flags = ImGuiSliderFlags_AlwaysClamp) {
 	float v = (float) (f * scale);
-	
-	ImGui::SliderFloat(label, &v, (float)min, (float)max, "%1.2f", flags);
+	std::string labelStr = std::string(label);
+
+	// If starts with ##, just do a normal SliderFloat
+	if (labelStr.size() > 2 && labelStr[0] == '#' && labelStr[1] == '#') {
+		ImGui::SliderFloat(label, &v, (float)min, (float)max, "%1.2f", flags);
+	} else {
+		// Otherwise do funny
+		ImGui::Text(label);
+		ImGui::SameLine();
+		ImGui::PushID((std::string(label) + "_id").c_str());
+		// Line up to a column, multiples of 100
+		constexpr uint32_t LABEL_CURSOR = 100;
+		uint32_t cursorPosX = ImGui::GetCursorPosX();
+		uint32_t roundedPosition = ((cursorPosX + LABEL_CURSOR / 2) / LABEL_CURSOR) * LABEL_CURSOR;
+		ImGui::SetCursorPosX(roundedPosition);
+		ImGui::SliderFloat((std::string("##") + label).c_str(), &v, (float)min, (float)max, "%1.2f", flags);
+		ImGui::PopID();
+	}
 	
 	f = v / scale;
 }
@@ -154,61 +170,64 @@ void CCal_DrawSettings() {
 	ImGui::Text("Hover over settings to learn more about them!");
 	ImGui::EndGroupPanel();
 
-	if (ImGui::Button("Reset settings")) {
-		CalCtx.ResetConfig();
-	}
-
 
 	// @TODO: Group in UI
 
 	// Section: Alignment speeds
+	{
+		ImGui::BeginGroupPanel("Calibration speeds", panel_size);
 
-	ImGui::Separator();
-	ImGui::TextWrapped(
-		"Calibration speeds: SpaceCalibrator uses up to three different speeds at which it drags the calibration back into "
-		"position when drift occurs. These settings control how far off the calibration should be before going back to low speed (for "
-		"Decel) or going to higher speeds (for Slow and Fast)."
-	);
-	if (ImGui::BeginTable("SpeedThresholds", 3, 0)) {
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(1);
-		ImGui::Text("Translation (mm)");
-		ImGui::TableSetColumnIndex(2);
-		ImGui::Text("Rotation (degrees)");
-		
-		
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Decel");
-		ImGui::TableSetColumnIndex(1);
-		ScaledDragFloat("##TransDecel", CalCtx.alignmentSpeedParams.thr_trans_tiny, 1000.0, 0, 20.0);
-		ImGui::TableSetColumnIndex(2);
-		ScaledDragFloat("##RotDecel", CalCtx.alignmentSpeedParams.thr_rot_tiny, 180.0 / EIGEN_PI, 0, 5.0);
-		
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Slow");
-		ImGui::TableSetColumnIndex(1);
-		ScaledDragFloat("##TransSlow", CalCtx.alignmentSpeedParams.thr_trans_small, 1000.0,
-			CalCtx.alignmentSpeedParams.thr_trans_tiny * 1000.0, 20.0);
-		ImGui::TableSetColumnIndex(2);
-		ScaledDragFloat("##RotSlow", CalCtx.alignmentSpeedParams.thr_rot_small, 180.0 / EIGEN_PI,
-			CalCtx.alignmentSpeedParams.thr_rot_tiny * (180.0 / EIGEN_PI), 10.0);
+		ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+		ImGui::TextWrapped(
+			"SpaceCalibrator uses up to three different speeds at which it drags the calibration back into "
+			"position when drift occurs. These settings control how far off the calibration should be before going back to low speed (for "
+			"Decel) or going to higher speeds (for Slow and Fast)."
+		);
+		ImGui::PopStyleColor();
 
-		ImGui::TableNextRow();
-		ImGui::TableSetColumnIndex(0);
-		ImGui::Text("Fast");
-		ImGui::TableSetColumnIndex(1);
-		ScaledDragFloat("##TransFast", CalCtx.alignmentSpeedParams.thr_trans_large, 1000.0,
-			CalCtx.alignmentSpeedParams.thr_trans_small * 1000.0, 50.0);
-		ImGui::TableSetColumnIndex(2);
-		ScaledDragFloat("##RotFast", CalCtx.alignmentSpeedParams.thr_rot_large, 180.0 / EIGEN_PI,
-			CalCtx.alignmentSpeedParams.thr_rot_small * (180.0 / EIGEN_PI), 20.0);
+		if (ImGui::BeginTable("SpeedThresholds", 3, 0)) {
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(1);
+			ImGui::Text("Translation (mm)");
+			ImGui::TableSetColumnIndex(2);
+			ImGui::Text("Rotation (degrees)");
 
-		ImGui::EndTable();
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Decel");
+			ImGui::TableSetColumnIndex(1);
+			ScaledDragFloat("##TransDecel", CalCtx.alignmentSpeedParams.thr_trans_tiny, 1000.0, 0, 20.0);
+			ImGui::TableSetColumnIndex(2);
+			ScaledDragFloat("##RotDecel", CalCtx.alignmentSpeedParams.thr_rot_tiny, 180.0 / EIGEN_PI, 0, 5.0);
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Slow");
+			ImGui::TableSetColumnIndex(1);
+			ScaledDragFloat("##TransSlow", CalCtx.alignmentSpeedParams.thr_trans_small, 1000.0,
+				CalCtx.alignmentSpeedParams.thr_trans_tiny * 1000.0, 20.0);
+			ImGui::TableSetColumnIndex(2);
+			ScaledDragFloat("##RotSlow", CalCtx.alignmentSpeedParams.thr_rot_small, 180.0 / EIGEN_PI,
+				CalCtx.alignmentSpeedParams.thr_rot_tiny * (180.0 / EIGEN_PI), 10.0);
+
+			ImGui::TableNextRow();
+			ImGui::TableSetColumnIndex(0);
+			ImGui::Text("Fast");
+			ImGui::TableSetColumnIndex(1);
+			ScaledDragFloat("##TransFast", CalCtx.alignmentSpeedParams.thr_trans_large, 1000.0,
+				CalCtx.alignmentSpeedParams.thr_trans_small * 1000.0, 50.0);
+			ImGui::TableSetColumnIndex(2);
+			ScaledDragFloat("##RotFast", CalCtx.alignmentSpeedParams.thr_rot_large, 180.0 / EIGEN_PI,
+				CalCtx.alignmentSpeedParams.thr_rot_small * (180.0 / EIGEN_PI), 20.0);
+
+			ImGui::EndTable();
+		}
+
+		ImGui::EndGroupPanel();
 	}
 
-	// Alignment speeds
+	// Section: Alignment speeds
 	{
 		ImGui::BeginGroupPanel("Alignment speeds", panel_size);
 
@@ -222,18 +241,22 @@ void CCal_DrawSettings() {
 	}
 	
 
-	// Continuous Calibration settings
+	// Section: Continuous Calibration settings
 	{
 		ImGui::BeginGroupPanel("Continuous calibration", panel_size);
 
 		{
 			// @TODO: Reduce code duplication (tooltips)
 			// Recalibration threshold
-			ImGui::SliderFloat("Recalibration threshold", &CalCtx.continuousCalibrationThreshold, 1.01f, 10.0f, "%1.1f", 0);
+			ImGui::Text("Recalibration threshold");
+			ImGui::SameLine();
+			ImGui::PushID("recalibration_threshold");
+			ImGui::SliderFloat("##recalibration_threshold_slider", &CalCtx.continuousCalibrationThreshold, 1.01f, 10.0f, "%1.1f", 0);
 			if (ImGui::IsItemHovered(0)) {
 				ImGui::SetTooltip("Controls how good the calibration must be before realigning the trackers.\n"
 					"Higher values cause calibration to happen less often, and may be useful for system with lots of tracking drift.");
 			}
+			ImGui::PopID();
 
 			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
 			ImGui::TextWrapped("Controls how often SpaceCalibrator synchronises playspaces.");
@@ -258,7 +281,15 @@ void CCal_DrawSettings() {
 		ImGui::EndGroupPanel();
 	}
 
-	// Contributors credits
+	ImGui::NewLine();
+	ImGui::Indent();
+	if (ImGui::Button("Reset settings")) {
+		CalCtx.ResetConfig();
+	}
+	ImGui::Unindent();
+	ImGui::NewLine();
+
+	// Section: Contributors credits
 	{
 		ImGui::BeginGroupPanel("Credits", panel_size);
 
