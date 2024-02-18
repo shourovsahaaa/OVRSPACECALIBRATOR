@@ -86,7 +86,7 @@ void ShowVersionLine() {
 }
 
 void CCal_BasicInfo();
-void CCal_AlignParams();
+void CCal_DrawSettings();
 
 void BuildContinuousCalDisplay() {
 	ImGui::SetNextWindowPos(ImVec2(0, 0));
@@ -119,8 +119,8 @@ void BuildContinuousCalDisplay() {
 			ImGui::EndTabItem();
 		}
 		
-		if (ImGui::BeginTabItem("Alignment speeds")) {
-			CCal_AlignParams();
+		if (ImGui::BeginTabItem("Settings")) {
+			CCal_DrawSettings();
 			ImGui::EndTabItem();
 		}
 
@@ -142,7 +142,7 @@ static void ScaledDragFloat(const char* label, double& f, double scale, double m
 	f = v / scale;
 }
 
-void CCal_AlignParams() {
+void CCal_DrawSettings() {
 	if (ImGui::Button("Reset settings")) {
 		CalCtx.ResetConfig();
 	}
