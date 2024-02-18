@@ -47,6 +47,7 @@ struct CalibrationContext
 	double wantedUpdateInterval = 1.0;
 
 	float continuousCalibrationThreshold;
+	Eigen::Vector3d continuousCalibrationOffset;
 
 	protocol::AlignmentSpeedParams alignmentSpeedParams;
 	bool enableStaticRecalibration;
@@ -84,6 +85,8 @@ struct CalibrationContext
 		alignmentSpeedParams.align_speed_large = 2.0f;
 
 		continuousCalibrationThreshold = 1.5f;
+
+		continuousCalibrationOffset = Eigen::Vector3d::Zero();
 
 		enableStaticRecalibration = true;
 	}
