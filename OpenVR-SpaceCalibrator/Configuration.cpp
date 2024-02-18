@@ -116,6 +116,9 @@ static void ParseProfile(CalibrationContext &ctx, std::istream &stream)
 		ctx.state = CalibrationState::ContinuousStandby;
 	}
 	ctx.quashTargetInContinuous = obj["quash_target_in_continuous"].evaluate_as_boolean();
+	ctx.continuousCalibrationOffset(0) = obj["continuous_calibration_target_offset_x"].get<double>();
+	ctx.continuousCalibrationOffset(1) = obj["continuous_calibration_target_offset_y"].get<double>();
+	ctx.continuousCalibrationOffset(2) = obj["continuous_calibration_target_offset_z"].get<double>();
 
 	if (obj["scale"].is<double>())
 		ctx.calibratedScale = obj["scale"].get<double>();
@@ -214,6 +217,9 @@ static void WriteProfile(CalibrationContext &ctx, std::ostream &out)
 	bool isInContinuousCalibrationMode = ctx.state == CalibrationState::Continuous || ctx.state == CalibrationState::ContinuousStandby;
 	profile["autostart_continuous_calibration"].set<bool>(isInContinuousCalibrationMode);
 	profile["quash_target_in_continuous"].set<bool>(ctx.quashTargetInContinuous);
+	profile["continuous_calibration_target_offset_x"].set<double>(ctx.continuousCalibrationOffset(0));
+	profile["continuous_calibration_target_offset_y"].set<double>(ctx.continuousCalibrationOffset(1));
+	profile["continuous_calibration_target_offset_z"].set<double>(ctx.continuousCalibrationOffset(2));
 
 	double speed = (int) ctx.calibrationSpeed;
 	profile["calibration_speed"].set<double>(speed);
@@ -315,6 +321,11 @@ static void WriteRegistryKey(std::string str)
 
 void LoadProfile(CalibrationContext &ctx)
 {
+	// @TODO: Rewrite this to migrate configs from the registry to the spacecal directory
+	//        I don't know why whoever wrote this thought writing to the registry in the 2020s was a good idea...
+	//        NOTE: HKEY_CURRENT_USER_LOCAL_SETTINGS evaluates to	HKCU\Software\Classes\Local Settings
+	//              Settings are currently stored at				HKCU\Software\Classes\Local Settings\Software\OpenVR-SpaceCalibrator
+
 	ctx.validProfile = false;
 
 	auto str = ReadRegistryKey();
