@@ -184,6 +184,13 @@ namespace {
 			return false;
 		}
 
+		// Apply tracker offsets
+		if (CalCtx.state == CalibrationState::Continuous || CalCtx.state == CalibrationState::ContinuousStandby) {
+			reference.vecPosition[0] += ctx.continuousCalibrationOffset.x();
+			reference.vecPosition[1] += ctx.continuousCalibrationOffset.y();
+			reference.vecPosition[2] += ctx.continuousCalibrationOffset.z();
+		}
+
 		calibration.PushSample(Sample(
 			ConvertPose(reference),
 			ConvertPose(target)
