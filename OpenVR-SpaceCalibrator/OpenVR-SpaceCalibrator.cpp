@@ -260,17 +260,19 @@ void RunLoop()
 				int id = ImGui::GetActiveID();
 				auto textInfo = ImGui::GetInputTextState(id);
 
-				textBuf[0] = 0;
-				int len = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)textInfo->TextW.Data, textInfo->TextW.Size, textBuf, sizeof(textBuf), NULL, NULL);
-				textBuf[min(len, sizeof(textBuf) - 1)] = 0;
-				
-				uint32_t unFlags = 0; // EKeyboardFlags 
+				if (textInfo != nullptr) {
+					textBuf[0] = 0;
+					int len = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)textInfo->TextW.Data, textInfo->TextW.Size, textBuf, sizeof(textBuf), NULL, NULL);
+					textBuf[min(len, sizeof(textBuf) - 1)] = 0;
 
-				vr::VROverlay()->ShowKeyboardForOverlay(
-					overlayMainHandle, vr::k_EGamepadTextInputModeNormal, vr::k_EGamepadTextInputLineModeSingleLine,
-					unFlags, "Space Calibrator Overlay", sizeof textBuf, textBuf, 0
-				);
-				keyboardOpen = true;
+					uint32_t unFlags = 0; // EKeyboardFlags 
+
+					vr::VROverlay()->ShowKeyboardForOverlay(
+						overlayMainHandle, vr::k_EGamepadTextInputModeNormal, vr::k_EGamepadTextInputLineModeSingleLine,
+						unFlags, "Space Calibrator Overlay", sizeof textBuf, textBuf, 0
+					);
+					keyboardOpen = true;
+				}
 			}
 
 			vr::VREvent_t vrEvent;
