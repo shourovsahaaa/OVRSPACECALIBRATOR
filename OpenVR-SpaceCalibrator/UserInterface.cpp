@@ -143,6 +143,8 @@ static void ScaledDragFloat(const char* label, double& f, double scale, double m
 	f = v / scale;
 }
 
+void DrawVectorElement(std::string id, const char* text, double* value);
+
 void CCal_DrawSettings() {
 
 	// panel size for boxes
@@ -241,6 +243,18 @@ void CCal_DrawSettings() {
 					"Higher values cause calibration to happen less often, and may be useful for system with lots of tracking drift.");
 			}
 		}
+
+		{
+			// Tracker offset
+			// ImVec2 panel_size_inner { ImGui::GetCurrentWindow()->DC.ItemWidth, 0};
+			ImVec2 panel_size_inner { panel_size.x - 11 * 2, 0};
+			ImGui::BeginGroupPanel("Tracker offset", panel_size_inner);
+			DrawVectorElement("cc_tracker_offset", "X", &CalCtx.continuousCalibrationOffset.x());
+			DrawVectorElement("cc_tracker_offset", "Y", &CalCtx.continuousCalibrationOffset.y());
+			DrawVectorElement("cc_tracker_offset", "Z", &CalCtx.continuousCalibrationOffset.z());
+			ImGui::EndGroupPanel();
+		}
+
 		ImGui::EndGroupPanel();
 	}
 
@@ -255,6 +269,34 @@ void CCal_DrawSettings() {
 		ImGui::TextDisabled("hekky");
 
 		ImGui::EndGroupPanel();
+	}
+}
+
+void DrawVectorElement(std::string id, const char* text, double* value) {
+	constexpr float CONTINUOUS_CALIBRATION_TRACKER_OFFSET_DELTA = 0.01f;
+
+	ImGui::Text(text);
+
+	ImGui::SameLine();
+
+	ImGui::PushID((id + text + "_btn_reset").c_str());
+	if (ImGui::Button(" 0 ")) {
+		*value *= 0;
+	}
+	ImGui::PopID();
+	ImGui::SameLine();
+	if (ImGui::ArrowButton((id + text + "_decrease").c_str(), ImGuiDir_Down)) {
+		*value -= CONTINUOUS_CALIBRATION_TRACKER_OFFSET_DELTA;
+	}
+	ImGui::SameLine();
+	ImGui::PushItemWidth(100);
+	ImGui::PushID((id + text + "_text_field").c_str());
+	ImGui::InputDouble("##label", value, 0, 0, "%.2f");
+	ImGui::PopID();
+	ImGui::PopItemWidth();
+	ImGui::SameLine();
+	if (ImGui::ArrowButton((id + text + "_increase").c_str(), ImGuiDir_Up)) {
+		*value += CONTINUOUS_CALIBRATION_TRACKER_OFFSET_DELTA;
 	}
 }
 
