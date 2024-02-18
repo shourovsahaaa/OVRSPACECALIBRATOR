@@ -11,6 +11,7 @@
 #include <vector>
 #include <algorithm>
 #include <imgui/imgui.h>
+#include "imgui_extensions.h"
 
 void TextWithWidth(const char *label, const char *text, float width);
 
@@ -143,16 +144,22 @@ static void ScaledDragFloat(const char* label, double& f, double scale, double m
 }
 
 void CCal_DrawSettings() {
+
+	// panel size for boxes
+	ImVec2 panel_size { ImGui::GetWindowContentRegionMax().x - ImGui::GetWindowContentRegionMin().x, 0 };
+
+	ImGui::BeginGroupPanel("Tip", panel_size);
+	ImGui::Text("Hover over settings to learn more about them!");
+	ImGui::EndGroupPanel();
+
 	if (ImGui::Button("Reset settings")) {
 		CalCtx.ResetConfig();
 	}
 
-	ImGui::SliderFloat("Recalibration threshold", &CalCtx.continuousCalibrationThreshold, 1.01f, 10.0f, "%1.1f", 0);
-	if (ImGui::IsItemHovered(0)) {
-		ImGui::SetTooltip("Controls how confident SpaceCalibrator must be in the new calibration before updating the calibration.\n"
-			"Higher values calibrate less frequently, and may be useful on systems with lots of tracker drift."
-		);
-	}
+
+	// @TODO: Group in UI
+
+	// Section: Alignment speeds
 
 	ImGui::Separator();
 	ImGui::TextWrapped(
@@ -199,11 +206,56 @@ void CCal_DrawSettings() {
 		ImGui::EndTable();
 	}
 
-	ImGui::Separator();
-	ImGui::Text("Alignment speeds");
-	ScaledDragFloat("Decel", CalCtx.alignmentSpeedParams.align_speed_tiny, 1.0, 0, 2.0, 0);
-	ScaledDragFloat("Slow", CalCtx.alignmentSpeedParams.align_speed_small, 1.0, 0, 2.0, 0);
-	ScaledDragFloat("Fast", CalCtx.alignmentSpeedParams.align_speed_large, 1.0, 0, 2.0, 0);
+	// Alignment speeds
+	{
+		ImGui::BeginGroupPanel("Alignment speeds", panel_size);
+
+		// ImGui::Separator();
+		// ImGui::Text("Alignment speeds");
+		ScaledDragFloat("Decel", CalCtx.alignmentSpeedParams.align_speed_tiny, 1.0, 0, 2.0, 0);
+		ScaledDragFloat("Slow", CalCtx.alignmentSpeedParams.align_speed_small, 1.0, 0, 2.0, 0);
+		ScaledDragFloat("Fast", CalCtx.alignmentSpeedParams.align_speed_large, 1.0, 0, 2.0, 0);
+		
+		ImGui::EndGroupPanel();
+	}
+	
+
+	// Continuous Calibration settings
+	{
+		ImGui::BeginGroupPanel("Continuous calibration", panel_size);
+
+		{
+			// @TODO: Reduce code duplication (tooltips)
+			// Recalibration threshold
+			ImGui::SliderFloat("Recalibration threshold", &CalCtx.continuousCalibrationThreshold, 1.01f, 10.0f, "%1.1f", 0);
+			if (ImGui::IsItemHovered(0)) {
+				ImGui::SetTooltip("Controls how good the calibration must be before realigning the trackers.\n"
+					"Higher values cause calibration to happen less often, and may be useful for system with lots of tracking drift.");
+			}
+
+			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
+			ImGui::TextWrapped("Controls how often SpaceCalibrator synchronises playspaces.");
+			ImGui::PopStyleColor();
+			if (ImGui::IsItemHovered(0)) {
+				ImGui::SetTooltip("Controls how good the calibration must be before realigning the trackers.\n"
+					"Higher values cause calibration to happen less often, and may be useful for system with lots of tracking drift.");
+			}
+		}
+		ImGui::EndGroupPanel();
+	}
+
+	// Contributors credits
+	{
+		ImGui::BeginGroupPanel("Credits", panel_size);
+
+		ImGui::TextDisabled("tach");
+		ImGui::TextDisabled("pushrax");
+		ImGui::TextDisabled("bd_");
+		ImGui::TextDisabled("ArcticFox");
+		ImGui::TextDisabled("hekky");
+
+		ImGui::EndGroupPanel();
+	}
 }
 
 void CCal_BasicInfo() {
