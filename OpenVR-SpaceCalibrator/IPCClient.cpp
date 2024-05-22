@@ -95,7 +95,7 @@ protocol::Response IPCClient::Receive()
 
 	if (bytesRead != sizeof response)
 	{
-		throw std::runtime_error("Invalid IPC response with size " + std::to_string(bytesRead));
+		throw std::runtime_error("Invalid IPC response. Error SIZE_MISMATCH, got size " + std::to_string(bytesRead));
 	}
 
 	return response;
