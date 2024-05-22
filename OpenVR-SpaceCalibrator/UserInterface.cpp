@@ -278,6 +278,14 @@ void CCal_DrawSettings() {
 			ImGui::EndGroupPanel();
 		}
 
+		{
+			// Playspace offset
+			ImVec2 panel_size_inner{ panel_size.x - 11 * 2, 0 };
+			ImGui::BeginGroupPanel("Playspace scale", panel_size_inner);
+			DrawVectorElement("cc_playspace_scale", "PLayspace Scale", &CalCtx.calibratedScale);
+			ImGui::EndGroupPanel();
+		}
+
 		ImGui::EndGroupPanel();
 	}
 

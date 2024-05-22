@@ -226,6 +226,7 @@ bool ServerTrackedDeviceProvider::HandleDevicePoseUpdated(uint32_t openVRID, vr:
 		pose.vecPosition[2] = -pose.vecWorldFromDriverTranslation[2];
 	} else if (tf.enabled)
 	{
+		// @TODO: Offset, scale, and re-offset
 		pose.vecPosition[0] *= tf.scale;
 		pose.vecPosition[1] *= tf.scale;
 		pose.vecPosition[2] *= tf.scale;

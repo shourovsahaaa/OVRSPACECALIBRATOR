@@ -237,8 +237,7 @@ static_assert(vr::k_unTrackedDeviceIndex_Hmd == 0, "HMD index expected to be 0")
 
 void ScanAndApplyProfile(CalibrationContext &ctx)
 {
-	std::unique_ptr<char[]> buffer_array(new char
-[vr::k_unMaxPropertyStringSize]);
+	std::unique_ptr<char[]> buffer_array(new char [vr::k_unMaxPropertyStringSize]);
 	char* buffer = buffer_array.get();
 	ctx.enabled = ctx.validProfile;
 
@@ -542,9 +541,7 @@ void CalibrationTick(double time)
 			ScanAndApplyProfile(ctx);
 
 			CalCtx.Log("Finished calibration, profile saved\n");
-		}
-		else
-		{
+		} else {
 			CalCtx.Log("Calibration failed.\n");
 		}
 
@@ -562,7 +559,9 @@ void CalibrationTick(double time)
 			calibration.Clear();
 		}
 		else {
-			for (int i = 0; i < 10; i++) calibration.ShiftSample();
+			for (int i = 0; i < 10; i++) {
+				calibration.ShiftSample();
+			}
 		}
 	}
 }

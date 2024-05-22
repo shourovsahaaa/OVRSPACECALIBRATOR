@@ -233,6 +233,10 @@ Eigen::Vector3d CalibrationCalc::CalibrateTranslation(const Eigen::Matrix3d &rot
 	return trans;
 }
 
+void CalibrationCalc::CalibrateScaleOffset(const Eigen::Matrix3d& rotation, Eigen::Vector3d* out_scaleOffset, float* out_scaleFactor) const {
+	// @TODO: figure out where the target and ref
+}
+
 
 namespace {
 	Pose ApplyTransform(const Pose& originalPose, const Eigen::AffineCompact3d& transform) {
@@ -496,7 +500,7 @@ bool CalibrationCalc::ComputeOneshot() {
 	bool valid = ValidateCalibration(calibration);
 
 	if (valid) {
-		m_estimatedTransformation = calibration;
+		m_estimatedTransformation = calibration; // @NOTE: Normal calibration
 		m_isValid = true;
 		return true;
 	}
@@ -622,7 +626,7 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold) {
 		}
 		
 		m_isValid = true;
-		m_estimatedTransformation = calibration;
+		m_estimatedTransformation = calibration; // @NOTE: Continuous calibration
 		m_axisVariance = newVariance;
 
 		if (!usingRelPose) {
