@@ -97,5 +97,12 @@ int VRState::FindDevice(const std::string& trackingSystem, const std::string& mo
 		if (device.trackingSystem == trackingSystem && device.model == model && device.serial == serial) return device.id;
 	}
 
+	// allow fallback excluding serial for HMD specifically
+	for (int i = 0; i < devices.size(); i++) {
+		const auto& device = devices[i];
+
+		if (device.trackingSystem == trackingSystem && device.model == model && device.deviceClass == vr::TrackedDeviceClass::TrackedDeviceClass_HMD) return device.id;
+	}
+
 	return -1;
 }
