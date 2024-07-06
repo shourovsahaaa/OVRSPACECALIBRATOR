@@ -369,7 +369,6 @@ void StartCalibration()
 }
 
 void StartContinuousCalibration() {
-	CalCtx.calibrationSpeed = CalibrationContext::SLOW;
 	StartCalibration();
 	CalCtx.state = CalibrationState::Continuous;
 	calibration.setRelativeTransformation(CalCtx.refToTargetPose, CalCtx.relativePosCalibrated);
