@@ -369,11 +369,16 @@ void StartCalibration()
 }
 
 void StartContinuousCalibration() {
-	CalCtx.calibrationSpeed = CalibrationContext::FAST;
 	StartCalibration();
 	CalCtx.state = CalibrationState::Continuous;
 	calibration.setRelativeTransformation(CalCtx.refToTargetPose, CalCtx.relativePosCalibrated);
-	CalCtx.Log("Collecting initial samples...");
+	calibration.lockRelativePosition = CalCtx.lockRelativePosition;
+	if (CalCtx.lockRelativePosition) {
+		CalCtx.Log("Relative position locked");
+	}
+	else {
+		CalCtx.Log("Collecting initial samples...");
+	}
 	Metrics::WriteLogAnnotation("StartContinuousCalibration");
 }
 
@@ -529,6 +534,7 @@ void CalibrationTick(double time)
 		if (CalCtx.state == CalibrationState::Continuous) {
 			CalCtx.messages.clear();
 			calibration.enableStaticRecalibration = CalCtx.enableStaticRecalibration;
+			calibration.lockRelativePosition = CalCtx.lockRelativePosition;
 			ok = calibration.ComputeIncremental(lerp, CalCtx.continuousCalibrationThreshold);
 		}
 		else {
@@ -569,7 +575,8 @@ void CalibrationTick(double time)
 			calibration.Clear();
 		}
 		else {
-			for (int i = 0; i < 10; i++) {
+			size_t drop_samples = CalCtx.SampleCount() / 10;
+			for (int i = 0; i < drop_samples; i++) {
 				calibration.ShiftSample();
 			}
 		}
