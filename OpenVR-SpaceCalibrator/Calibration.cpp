@@ -210,6 +210,18 @@ namespace {
 			CalCtx.targetID = state.FindDevice(CalCtx.targetStandby.trackingSystem, CalCtx.targetStandby.model, CalCtx.targetStandby.serial);
 		}
 
+		for (int i = 0; i < CalCtx.MAX_CONTROLLERS; i++) {
+			if (i < state.devices.size()
+				&& state.devices[i].trackingSystem == CalCtx.targetTrackingSystem
+				&& state.devices[i].deviceClass == vr::TrackedDeviceClass_Controller
+				&& (state.devices[i].controllerRole == vr::TrackedControllerRole_LeftHand || state.devices[i].controllerRole == vr::TrackedControllerRole_RightHand))
+			{
+				CalCtx.controllerIDs[i] = state.devices[i].id;
+			} else {
+				CalCtx.controllerIDs[i] = -1;
+			}
+		}
+
 		return CalCtx.referenceID >= 0 && CalCtx.targetID >= 0;
 	}
 }
@@ -359,8 +371,8 @@ void ScanAndApplyProfile(CalibrationContext &ctx)
 	}
 }
 
-void StartCalibration()
-{
+void StartCalibration() {
+	AssignTargets();
 	CalCtx.state = CalibrationState::Begin;
 	CalCtx.wantedUpdateInterval = 0.0;
 	CalCtx.messages.clear();
@@ -369,6 +381,7 @@ void StartCalibration()
 }
 
 void StartContinuousCalibration() {
+	AssignTargets();
 	StartCalibration();
 	CalCtx.state = CalibrationState::Continuous;
 	calibration.setRelativeTransformation(CalCtx.refToTargetPose, CalCtx.relativePosCalibrated);
@@ -513,6 +526,27 @@ void CalibrationTick(double time)
 			CalCtx.Log("Aborting calibration!\n");
 		}
 		return;
+	}
+
+	if (CalCtx.state == CalibrationState::Continuous && CalCtx.requireTriggerPressToApply) {
+		bool triggerPressed = true;
+		vr::VRControllerState_t state;
+		for (int i = 0; i < CalCtx.MAX_CONTROLLERS; i++) {
+			if (CalCtx.controllerIDs[i] >= 0) {
+				vr::VRSystem()->GetControllerState(CalCtx.controllerIDs[i], &state, sizeof(state));
+				triggerPressed &= state.rAxis[vr::k_eControllerAxis_TrackPad /* matches trigger on Index controllers?? */].x > 0.75f
+					|| state.rAxis[vr::k_eControllerAxis_Trigger].x > 0.75f;
+				//printf("Controller %d tracpad: %f\n", i, state.rAxis[vr::k_eControllerAxis_TrackPad].x);
+				//printf("Controller %d trigger: %f\n", i, state.rAxis[vr::k_eControllerAxis_Trigger].x);
+				if (!triggerPressed) break;
+			}
+		}
+
+		if (!triggerPressed) {
+			ctx.wantedUpdateInterval = 0.5;
+			CalCtx.Log("Waiting for trigger press...\n");
+			return;
+		}
 	}
 
 	if (!CollectSample(ctx))
