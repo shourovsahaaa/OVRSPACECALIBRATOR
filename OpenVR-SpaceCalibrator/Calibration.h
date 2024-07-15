@@ -95,7 +95,7 @@ struct CalibrationContext
 
 		continuousCalibrationOffset = Eigen::Vector3d::Zero();
 
-		enableStaticRecalibration = true;
+		enableStaticRecalibration = false;
 	}
 
 	struct Chaperone
