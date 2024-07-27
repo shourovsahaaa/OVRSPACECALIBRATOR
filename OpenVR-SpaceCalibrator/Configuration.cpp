@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <limits>
 
-static picojson::array FloatArray(const float *buf, int numFloats)
+static picojson::array FloatArray(const float *buf, size_t numFloats)
 {
 	picojson::array arr;
 
@@ -20,7 +20,7 @@ static picojson::array FloatArray(const float *buf, int numFloats)
 	return arr;
 }
 
-static void LoadFloatArray(const picojson::value &obj, float *buf, int numFloats)
+static void LoadFloatArray(const picojson::value &obj, float *buf, size_t numFloats)
 {
 	if (!obj.is<picojson::array>()) {
 		throw std::runtime_error("expected array, got " + obj.to_str());
@@ -341,7 +341,7 @@ static void WriteRegistryKey(std::string str)
 		return;
 	}
 
-	DWORD size = str.size() + 1;
+	DWORD size = static_cast<DWORD>(str.size() + 1);
 
 	result = RegSetValueExA(hkey, "Config", 0, REG_SZ, reinterpret_cast<const BYTE*>(str.c_str()), size);
 	if (result != ERROR_SUCCESS) {
