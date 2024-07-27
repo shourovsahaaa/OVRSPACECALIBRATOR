@@ -185,6 +185,7 @@ void CCal_DrawSettings() {
 		);
 		ImGui::PopStyleColor();
 
+		// Calibration Speed
 		if (ImGui::BeginTable("SpeedThresholds", 3, 0)) {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(1);
