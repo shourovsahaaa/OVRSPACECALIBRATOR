@@ -120,6 +120,7 @@ static void ParseProfile(CalibrationContext &ctx, std::istream &stream)
 	ctx.continuousCalibrationOffset(0) = obj["continuous_calibration_target_offset_x"].get<double>();
 	ctx.continuousCalibrationOffset(1) = obj["continuous_calibration_target_offset_y"].get<double>();
 	ctx.continuousCalibrationOffset(2) = obj["continuous_calibration_target_offset_z"].get<double>();
+	if (obj["static_calibration"].is<bool>()) {
 
 	if (obj["scale"].is<double>())
 		ctx.calibratedScale = obj["scale"].get<double>();
@@ -225,6 +226,9 @@ static void WriteProfile(CalibrationContext &ctx, std::ostream &out)
 	profile["continuous_calibration_target_offset_x"].set<double>(ctx.continuousCalibrationOffset(0));
 	profile["continuous_calibration_target_offset_y"].set<double>(ctx.continuousCalibrationOffset(1));
 	profile["continuous_calibration_target_offset_z"].set<double>(ctx.continuousCalibrationOffset(2));
+	profile["static_calibration"].set<bool>(ctx.enableStaticRecalibration);
+	double jitterThreshold = (double)ctx.jitterThreshold;
+	profile["jitter_threshold"].set<double>(jitterThreshold);
 
 	double speed = (int) ctx.calibrationSpeed;
 	profile["calibration_speed"].set<double>(speed);
