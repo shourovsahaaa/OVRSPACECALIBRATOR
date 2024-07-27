@@ -186,6 +186,28 @@ void CCal_DrawSettings() {
 		ImGui::PopStyleColor();
 
 		// Calibration Speed
+		{
+			ImGui::BeginGroupPanel("Calibration speed", panel_size);
+		
+			auto speed = CalCtx.calibrationSpeed;
+
+			ImGui::Columns(3, NULL, false);
+			if (ImGui::RadioButton(" Fast          ", speed == CalibrationContext::FAST)) {
+				CalCtx.calibrationSpeed = CalibrationContext::FAST;
+			}
+			ImGui::NextColumn();
+			if (ImGui::RadioButton(" Slow          ", speed == CalibrationContext::SLOW)) {
+				CalCtx.calibrationSpeed = CalibrationContext::SLOW;
+			}
+			ImGui::NextColumn();
+			if (ImGui::RadioButton(" Very Slow     ", speed == CalibrationContext::VERY_SLOW)) {
+				CalCtx.calibrationSpeed = CalibrationContext::VERY_SLOW;
+			}
+			ImGui::Columns(1);
+
+			ImGui::EndGroupPanel();
+		}
+
 		if (ImGui::BeginTable("SpeedThresholds", 3, 0)) {
 			ImGui::TableNextRow();
 			ImGui::TableSetColumnIndex(1);
