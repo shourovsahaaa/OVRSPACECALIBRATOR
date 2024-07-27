@@ -245,7 +245,6 @@ void CCal_DrawSettings() {
 	// Section: Continuous Calibration settings
 	{
 		ImGui::BeginGroupPanel("Continuous calibration", panel_size);
-
 		{
 			// @TODO: Reduce code duplication (tooltips)
 			// Recalibration threshold
@@ -360,7 +359,7 @@ void CCal_BasicInfo() {
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, 0xFF000080);
 			status = "NOT FOUND";
 		}
-		else if (!CalCtx.ReferencePoseIsValid()) {
+		else if (!CalCtx.ReferencePoseIsValidSimple()) {
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, 0xFFFF0080);
 			status = "NOT TRACKING";
 		}
@@ -381,7 +380,7 @@ void CCal_BasicInfo() {
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, 0xFF000080);
 			status = "NOT FOUND";
 		}
-		else if (!CalCtx.TargetPoseIsValid()) {
+		else if (!CalCtx.TargetPoseIsValidSimple()) {
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, 0xFFFF0080);
 			status = "NOT TRACKING";
 		}

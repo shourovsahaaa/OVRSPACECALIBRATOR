@@ -186,12 +186,12 @@ struct CalibrationContext
 		messages.back().target = target;
 	}
 
-	bool TargetPoseIsValid() const {
+	bool TargetPoseIsValidSimple() const {
 		return targetID >= 0 && targetID <= vr::k_unMaxTrackedDeviceCount
 			&& devicePoses[targetID].poseIsValid;
 	}
 
-	bool ReferencePoseIsValid() const {
+	bool ReferencePoseIsValidSimple() const {
 		return referenceID >= 0 && referenceID <= vr::k_unMaxTrackedDeviceCount
 			&& devicePoses[referenceID].poseIsValid;
 	}

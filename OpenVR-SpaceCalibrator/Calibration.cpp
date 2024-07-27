@@ -498,12 +498,12 @@ void CalibrationTick(double time)
 
 		ScanAndApplyProfile(ctx);
 
-		if (!CalCtx.ReferencePoseIsValid())
+		if (!CalCtx.ReferencePoseIsValidSimple())
 		{
 			CalCtx.Log("Reference device is not tracking\n"); ok = false;
 		}
 
-		if (!CalCtx.TargetPoseIsValid())
+		if (!CalCtx.TargetPoseIsValidSimple())
 		{
 			CalCtx.Log("Target device is not tracking\n"); ok = false;
 		}
@@ -538,7 +538,9 @@ void CalibrationTick(double time)
 					|| state.rAxis[vr::k_eControllerAxis_Trigger].x > 0.75f;
 				//printf("Controller %d tracpad: %f\n", i, state.rAxis[vr::k_eControllerAxis_TrackPad].x);
 				//printf("Controller %d trigger: %f\n", i, state.rAxis[vr::k_eControllerAxis_Trigger].x);
-				if (!triggerPressed) break;
+				if (!triggerPressed) {
+					break;
+				}
 			}
 		}
 
