@@ -13,37 +13,49 @@ static picojson::array FloatArray(const float *buf, int numFloats)
 {
 	picojson::array arr;
 
-	for (int i = 0; i < numFloats; i++)
+	for (int i = 0; i < numFloats; i++) {
 		arr.push_back(picojson::value(double(buf[i])));
+	}
 
 	return arr;
 }
 
 static void LoadFloatArray(const picojson::value &obj, float *buf, int numFloats)
 {
-	if (!obj.is<picojson::array>())
+	if (!obj.is<picojson::array>()) {
 		throw std::runtime_error("expected array, got " + obj.to_str());
+	}
 
 	auto &arr = obj.get<picojson::array>();
-	if (arr.size() != numFloats)
+	if (arr.size() != numFloats) {
 		throw std::runtime_error("wrong buffer size");
+	}
 
-	for (int i = 0; i < numFloats; i++)
+	for (int i = 0; i < numFloats; i++) {
 		buf[i] = (float) arr[i].get<double>();
+	}
 }
 
 static void LoadStandby(StandbyDevice& device, picojson::value& value) {
-	if (!value.is<picojson::object>()) return;
+	if (!value.is<picojson::object>()) {
+		return;
+	}
 	auto& obj = value.get<picojson::object>();
 	
 	const auto &system = obj["tracking_system"];
-	if (system.is<std::string>()) device.trackingSystem = system.get<std::string>();
+	if (system.is<std::string>()) {
+		device.trackingSystem = system.get<std::string>();
+	}
 
 	const auto& model = obj["model"];
-	if (model.is<std::string>()) device.model = model.get<std::string>();
+	if (model.is<std::string>()) {
+		device.model = model.get<std::string>();
+	}
 
 	const auto& serial = obj["serial"];
-	if (serial.is<std::string>()) device.serial = serial.get<std::string>();
+	if (serial.is<std::string>()) {
+		device.serial = serial.get<std::string>();
+	}
 }
 
 static void VisitAlignmentParams(CalibrationContext& ctx, std::function<void(const char *, double&)> MapParam) {
@@ -67,7 +79,9 @@ static void VisitAlignmentParams(CalibrationContext& ctx, std::function<void(con
 static void LoadAlignmentParams(CalibrationContext& ctx, picojson::value& value) {
 	ctx.ResetConfig();
 	
-	if (!value.is<picojson::object>()) return;
+	if (!value.is<picojson::object>()) {
+		return;
+	}
 	auto& obj = value.get<picojson::object>();
 	
 	VisitAlignmentParams(ctx, [&](auto name, auto& param) {
@@ -92,12 +106,14 @@ static void ParseProfile(CalibrationContext &ctx, std::istream &stream)
 {
 	picojson::value v;
 	std::string err = picojson::parse(v, stream);
-	if (!err.empty())
+	if (!err.empty()) {
 		throw std::runtime_error(err);
+	}
 
 	auto arr = v.get<picojson::array>();
-	if (arr.size() < 1)
+	if (arr.size() < 1) {
 		throw std::runtime_error("no profiles in file");
+	}
 
 	auto obj = arr[0].get<picojson::object>();
 
@@ -121,17 +137,25 @@ static void ParseProfile(CalibrationContext &ctx, std::istream &stream)
 	ctx.continuousCalibrationOffset(1) = obj["continuous_calibration_target_offset_y"].get<double>();
 	ctx.continuousCalibrationOffset(2) = obj["continuous_calibration_target_offset_z"].get<double>();
 	if (obj["static_calibration"].is<bool>()) {
+		ctx.enableStaticRecalibration = obj["static_calibration"].get<bool>();
+	}
+	if (obj["jitter_threshold"].is<double>()) {
+		ctx.jitterThreshold = ((float) obj["jitter_threshold"].get<double>());
+	} else {
+		ctx.jitterThreshold = 0.1f;
+	}
 
-	if (obj["scale"].is<double>())
+	if (obj["scale"].is<double>()) {
 		ctx.calibratedScale = obj["scale"].get<double>();
-	else
+	} else {
 		ctx.calibratedScale = 1.0;
+	}
 
-	if (obj["calibration_speed"].is<double>())
+	if (obj["calibration_speed"].is<double>()) {
 		ctx.calibrationSpeed = (CalibrationContext::Speed)(int) obj["calibration_speed"].get<double>();
+	}
 
-	if (obj["chaperone"].is<picojson::object>())
-	{
+	if (obj["chaperone"].is<picojson::object>()) {
 		auto chaperone = obj["chaperone"].get<picojson::object>();
 		ctx.chaperone.autoApply = chaperone["auto_apply"].get<bool>();
 
@@ -143,13 +167,13 @@ static void ParseProfile(CalibrationContext &ctx, std::istream &stream)
 			sizeof(ctx.chaperone.standingCenter.m) / sizeof(float)
 		);
 
-		if (!chaperone["geometry"].is<picojson::array>())
+		if (!chaperone["geometry"].is<picojson::array>()) {
 			throw std::runtime_error("chaperone geometry is not an array");
+		}
 
 		auto &geometry = chaperone["geometry"].get<picojson::array>();
 
-		if (geometry.size() > 0)
-		{
+		if (geometry.size() > 0) {
 			ctx.chaperone.geometry.resize(geometry.size() * sizeof(float) / sizeof(ctx.chaperone.geometry[0]));
 			LoadFloatArray(chaperone["geometry"], (float *) ctx.chaperone.geometry.data(), geometry.size());
 
@@ -202,8 +226,9 @@ static void WriteStandby(StandbyDevice& device, picojson::value& value) {
 
 static void WriteProfile(CalibrationContext &ctx, std::ostream &out)
 {
-	if (!ctx.validProfile)
+	if (!ctx.validProfile) {
 		return;
+	}
 
 	picojson::object profile;
 	profile["alignment_params"].set<picojson::object>(SaveAlignmentParams(ctx));
@@ -233,8 +258,7 @@ static void WriteProfile(CalibrationContext &ctx, std::ostream &out)
 	double speed = (int) ctx.calibrationSpeed;
 	profile["calibration_speed"].set<double>(speed);
 
-	if (ctx.chaperone.valid)
-	{
+	if (ctx.chaperone.valid) {
 		picojson::object chaperone;
 		chaperone["auto_apply"].set<bool>(ctx.chaperone.autoApply);
 		chaperone["play_space_size"].set<picojson::array>(FloatArray(ctx.chaperone.playSpaceSize.v, 2));
@@ -290,8 +314,7 @@ static std::string ReadRegistryKey()
 {
 	DWORD size = 0;
 	auto result = RegGetValueA(HKEY_CURRENT_USER_LOCAL_SETTINGS, RegistryKey, "Config", RRF_RT_REG_SZ, 0, 0, &size);
-	if (result != ERROR_SUCCESS)
-	{
+	if (result != ERROR_SUCCESS) {
 		LogRegistryResult(result);
 		return "";
 	}
@@ -300,8 +323,7 @@ static std::string ReadRegistryKey()
 	str.resize(size);
 
 	result = RegGetValueA(HKEY_CURRENT_USER_LOCAL_SETTINGS, RegistryKey, "Config", RRF_RT_REG_SZ, 0, &str[0], &size);
-	if (result != ERROR_SUCCESS)
-	{
+	if (result != ERROR_SUCCESS) {
 		LogRegistryResult(result);
 		return "";
 	}
@@ -314,8 +336,7 @@ static void WriteRegistryKey(std::string str)
 {
 	HKEY hkey;
 	auto result = RegCreateKeyExA(HKEY_CURRENT_USER_LOCAL_SETTINGS, RegistryKey, 0, REG_NONE, 0, KEY_ALL_ACCESS, 0, &hkey, 0);
-	if (result != ERROR_SUCCESS)
-	{
+	if (result != ERROR_SUCCESS) {
 		LogRegistryResult(result);
 		return;
 	}
@@ -323,8 +344,9 @@ static void WriteRegistryKey(std::string str)
 	DWORD size = str.size() + 1;
 
 	result = RegSetValueExA(hkey, "Config", 0, REG_SZ, reinterpret_cast<const BYTE*>(str.c_str()), size);
-	if (result != ERROR_SUCCESS)
+	if (result != ERROR_SUCCESS) {
 		LogRegistryResult(result);
+	}
 
 	RegCloseKey(hkey);
 }
@@ -339,21 +361,17 @@ void LoadProfile(CalibrationContext &ctx)
 	ctx.validProfile = false;
 
 	auto str = ReadRegistryKey();
-	if (str == "")
-	{
+	if (str == "") {
 		std::cout << "Profile is empty" << std::endl;
 		ctx.Clear();
 		return;
 	}
 
-	try
-	{
+	try {
 		std::stringstream io(str);
 		ParseProfile(ctx, io);
 		std::cout << "Loaded profile" << std::endl;
-	}
-	catch (const std::runtime_error &e)
-	{
+	} catch (const std::runtime_error &e) {
 		std::cerr << "Error loading profile: " << e.what() << std::endl;
 	}
 }
