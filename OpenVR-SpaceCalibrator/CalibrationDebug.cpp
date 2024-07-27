@@ -221,6 +221,32 @@ namespace {
 		}
 	}
 
+	void G_JitterReference() {
+		if (ImPlot::BeginPlot("##JitterReference", ImVec2(-1, 0), ImPlotFlags_NoLegend)) {
+			ImPlot::SetupAxes(NULL, NULL, 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			SetupXAxis();
+			ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 10, ImGuiCond_Appearing);
+
+			AddApplyTicks();
+
+			PlotLineG("Reference Jitter", Metrics::jitterRef);
+			ImPlot::EndPlot();
+		}
+	}
+
+	void G_JitterTarget() {
+		if (ImPlot::BeginPlot("##JitterTarget", ImVec2(-1, 0), ImPlotFlags_NoLegend)) {
+			ImPlot::SetupAxes(NULL, NULL, 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			SetupXAxis();
+			ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 10, ImGuiCond_Appearing);
+
+			AddApplyTicks();
+
+			PlotLineG("Target Jitter", Metrics::jitterTarget);
+			ImPlot::EndPlot();
+		}
+	}
+
 	void G_AxisVariance() {
 		static bool firstrun = true;
 		static ImPlotColormap axisVarianceColormap;
@@ -294,7 +320,9 @@ namespace {
 		{ "Offset: Current Calibration", G_PosOffset_CurrentCal },
 		{ "Offset: Last Sample", G_PosOffset_LastSample },
 		{ "Offset: By Rel Pose", G_PosOffset_ByRelPose },
-		{ "Processing time", G_ComputationTime }
+		{ "Processing time", G_ComputationTime },
+		{ "Reference Jitter", G_JitterReference },
+		{ "Target Jitter", G_JitterTarget }
 	};
 
 	const int N_GRAPHS = sizeof(graphs) / sizeof(graphs[0]);

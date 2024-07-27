@@ -291,6 +291,67 @@ double CalibrationCalc::RetargetingErrorRMS(
 	return sqrt(errorAccum / sampleCount);
 }
 
+double CalibrationCalc::ReferenceJitter() const {
+	Eigen::Vector3d m_oldM, m_newM, m_oldS, m_newS;
+	int sampleCount = 0;
+
+	for (auto& sample : m_samples) {
+		if (!sample.valid) continue;
+
+		if (sampleCount == 0) {
+			m_oldM = m_newM = sample.ref.trans;
+			m_oldS = Eigen::Vector3d();
+		} else {
+			m_newM = m_oldM + (sample.ref.trans - m_oldM) / sampleCount;
+			m_newS = m_oldS + (sample.ref.trans - m_oldM).cwiseProduct(sample.ref.trans - m_newM);
+
+			// set up for next iteration
+			m_oldM = m_newM;
+			m_oldS = m_newS;
+		}
+
+		sampleCount++;
+	}
+
+	double var_x = sqrt(((sampleCount > 1) ? m_newS.x() / (sampleCount - 1) : 0.0));
+	double var_y = sqrt(((sampleCount > 1) ? m_newS.y() / (sampleCount - 1) : 0.0));
+	double var_z = sqrt(((sampleCount > 1) ? m_newS.z() / (sampleCount - 1) : 0.0));
+
+	// Take magnitude of standard deviation vector
+	return sqrt(var_x * var_x + var_y * var_y + var_z * var_z);
+}
+
+double CalibrationCalc::TargetJitter() const {
+	Eigen::Vector3d m_oldM, m_newM, m_oldS, m_newS;
+	int sampleCount = 0;
+
+	for (auto& sample : m_samples) {
+		if (!sample.valid) continue;
+
+		if (sampleCount == 0) {
+			m_oldM = m_newM = sample.target.trans;
+			m_oldS = Eigen::Vector3d();
+		}
+		else {
+			m_newM = m_oldM + (sample.target.trans - m_oldM) / sampleCount;
+			m_newS = m_oldS + (sample.target.trans - m_oldM).cwiseProduct(sample.target.trans - m_newM);
+
+			// set up for next iteration
+			m_oldM = m_newM;
+			m_oldS = m_newS;
+		}
+
+		sampleCount++;
+	}
+
+	double var_x = sqrt(((sampleCount > 1) ? std::abs(m_newS.x() / (sampleCount - 1)) : 0.0));
+	double var_y = sqrt(((sampleCount > 1) ? std::abs(m_newS.y() / (sampleCount - 1)) : 0.0));
+	double var_z = sqrt(((sampleCount > 1) ? std::abs(m_newS.z() / (sampleCount - 1)) : 0.0));
+
+	// Take magnitude of standard deviation vector
+	return sqrt(var_x * var_x + var_y * var_y + var_z * var_z);
+}
+
 Eigen::Vector3d CalibrationCalc::ComputeRefToTargetOffset(const Eigen::AffineCompact3d& calibration) const {
 	Eigen::Vector3d accum = Eigen::Vector3d::Zero();
 	int sampleCount = 0;

@@ -49,6 +49,7 @@ struct CalibrationContext
 	bool requireTriggerPressToApply = false;
 	double timeLastTick = 0, timeLastScan = 0;
 	double wantedUpdateInterval = 1.0;
+	float jitterThreshold = 0.1f;
 
 	float xprev, yprev, zprev;
 
@@ -151,7 +152,7 @@ struct CalibrationContext
 			Progress
 		} type = String;
 
-		Message(Type type) : type(type) { }
+		Message(Type type) : type(type), progress(0), target(0) { }
 
 		std::string str;
 		int progress, target;

@@ -280,6 +280,17 @@ void CCal_DrawSettings() {
 			}
 			ImGui::PopID();
 
+			// Jitter threshold
+			ImGui::Text("Jitter threshold");
+			ImGui::SameLine();
+			ImGui::PushID("jtter_threshold");
+			ImGui::SliderFloat("##jitter_threshold_slider", &CalCtx.jitterThreshold, 0.1f, 10.0f, "%1.1f", 0);
+			if (ImGui::IsItemHovered(0)) {
+				ImGui::SetTooltip("Controls how much jitter will be allowed for calibration.\n"
+					"Higher values allow worse tracking to calibrate, but may result in poorer tracking.");
+			}
+			ImGui::PopID();
+
 			ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetStyleColorVec4(ImGuiCol_TextDisabled));
 			ImGui::TextWrapped("Controls how often SpaceCalibrator synchronises playspaces.");
 			ImGui::PopStyleColor();

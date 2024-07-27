@@ -50,8 +50,9 @@ struct Sample
 {
 	Pose ref, target;
 	bool valid;
-	Sample() : valid(false) { }
-	Sample(Pose ref, Pose target) : valid(true), ref(ref), target(target) { }
+	double timestamp;
+	Sample() : valid(false), timestamp(0) { }
+	Sample(Pose ref, Pose target, double timestamp) : valid(true), ref(ref), target(target), timestamp(timestamp){ }
 };
 
 class CalibrationCalc {
@@ -93,6 +94,9 @@ public:
 
 	void PushSample(const Sample& sample);
 	void Clear();
+
+	double ReferenceJitter() const;
+	double TargetJitter() const;
 
 	bool ComputeOneshot();
 	bool ComputeIncremental(bool &lerp, double threshold);

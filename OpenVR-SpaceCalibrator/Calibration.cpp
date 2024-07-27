@@ -11,6 +11,7 @@
 #include <iostream>
 
 #include <Eigen/Dense>
+#include <GLFW/glfw3.h>
 
 inline vr::HmdQuaternion_t operator*(const vr::HmdQuaternion_t& lhs, const vr::HmdQuaternion_t& rhs) {
 	return {
@@ -193,7 +194,8 @@ namespace {
 
 		calibration.PushSample(Sample(
 			ConvertPose(reference),
-			ConvertPose(target)
+			ConvertPose(target),
+			glfwGetTime()
 		));
 
 		return true;
@@ -498,6 +500,9 @@ void CalibrationTick(double time)
 
 		ScanAndApplyProfile(ctx);
 
+		Metrics::jitterRef.Push(calibration.ReferenceJitter());
+		Metrics::jitterRef.Push(calibration.TargetJitter());
+
 		if (!CalCtx.ReferencePoseIsValidSimple())
 		{
 			CalCtx.Log("Reference device is not tracking\n"); ok = false;
@@ -505,6 +510,14 @@ void CalibrationTick(double time)
 
 		if (!CalCtx.TargetPoseIsValidSimple())
 		{
+			CalCtx.Log("Target device is not tracking\n"); ok = false;
+		}
+		
+		// @TOOD: Determine if the tracking is jittery
+		if (calibration.ReferenceJitter() > ctx.jitterThreshold) {
+			CalCtx.Log("Reference device is not tracking\n"); ok = false;
+		}
+		if (calibration.TargetJitter() > ctx.jitterThreshold) {
 			CalCtx.Log("Target device is not tracking\n"); ok = false;
 		}
 

@@ -15,6 +15,7 @@ namespace Metrics {
 	TimeSeries<double> error_rawComputed, error_currentCal, error_byRelPose, error_currentCalRelPose;
 	TimeSeries<double> axisIndependence;
 	TimeSeries<double> computationTime;
+	TimeSeries<double> jitterRef, jitterTarget;
 
 	// true - full calibration, false - static calibration
 	TimeSeries<bool> calibrationApplied;
@@ -73,6 +74,8 @@ namespace Metrics {
 		TS_FIELD(error_currentCalRelPose),
 		TS_FIELD(axisIndependence),
 		TS_FIELD(computationTime),
+		TS_FIELD(jitterRef),
+		TS_FIELD(jitterTarget),
 
 		{
 			"calibrationApplied", 
