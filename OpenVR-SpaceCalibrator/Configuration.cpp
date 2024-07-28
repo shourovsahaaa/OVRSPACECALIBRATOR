@@ -198,15 +198,15 @@ static void ParseProfile(CalibrationContext &ctx, std::istream &stream)
 		refToTargetTranslation(1) = relTransform["y"].get<double>();
 		refToTargetTranslation(2) = relTransform["z"].get<double>();
 
-        Eigen::Matrix3d rotationMatrix;
-        rotationMatrix =
-            Eigen::AngleAxisd(refToTragetRoation[0], Eigen::Vector3d::UnitX()) *
-            Eigen::AngleAxisd(refToTragetRoation[1], Eigen::Vector3d::UnitY()) *
-            Eigen::AngleAxisd(refToTragetRoation[2], Eigen::Vector3d::UnitZ());
+		Eigen::Matrix3d rotationMatrix;
+		rotationMatrix =
+			Eigen::AngleAxisd(refToTragetRoation[0], Eigen::Vector3d::UnitX()) *
+			Eigen::AngleAxisd(refToTragetRoation[1], Eigen::Vector3d::UnitY()) *
+			Eigen::AngleAxisd(refToTragetRoation[2], Eigen::Vector3d::UnitZ());
 
 		ctx.refToTargetPose = Eigen::AffineCompact3d::Identity();
-        ctx.refToTargetPose.linear() = rotationMatrix;
-        ctx.refToTargetPose.translation() = refToTargetTranslation;
+		ctx.refToTargetPose.linear() = rotationMatrix;
+		ctx.refToTargetPose.translation() = refToTargetTranslation;
 	}
 
 	ctx.validProfile = true;
