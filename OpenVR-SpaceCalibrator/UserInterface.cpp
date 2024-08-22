@@ -14,6 +14,7 @@
 #include "imgui_extensions.h"
 
 void TextWithWidth(const char *label, const char *text, float width);
+void DrawVectorElement(const std::string id, const char* text, double* value, int defaultValue = 0);
 
 VRState LoadVRState();
 void BuildSystemSelection(const VRState &state);
@@ -158,8 +159,6 @@ static void ScaledDragFloat(const char* label, double& f, double scale, double m
 	
 	f = v / scale;
 }
-
-void DrawVectorElement(std::string id, const char* text, double* value);
 
 void CCal_DrawSettings() {
 
@@ -345,7 +344,7 @@ void CCal_DrawSettings() {
 	}
 }
 
-void DrawVectorElement(std::string id, const char* text, double* value) {
+void DrawVectorElement(const std::string id, const char* text, double* value, int defaultValue) {
 	constexpr float CONTINUOUS_CALIBRATION_TRACKER_OFFSET_DELTA = 0.01f;
 
 	ImGui::Text(text);
