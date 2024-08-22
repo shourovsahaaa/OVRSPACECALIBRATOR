@@ -16,6 +16,7 @@
 #include <chrono>
 #include <thread>
 
+#include <stb_image.h>
 
 #pragma comment(linker,"\"/manifestdependency:type='win32' \
 name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
@@ -84,7 +85,16 @@ void CreateGLFWWindow()
 	glfwSwapInterval(1);
 	gl3wInit();
 
+	// Minimise the window
 	glfwIconifyWindow(glfwWindow);
+
+	// Load icon and set it in the window
+	GLFWimage images[1];
+	std::string iconPath = cwd;
+	iconPath += "\\icon.png";
+	images[0].pixels = stbi_load(iconPath.c_str(), &images[0].width, &images[0].height, 0, 4);
+	glfwSetWindowIcon(glfwWindow, 1, images);
+	stbi_image_free(images[0].pixels);
 
 #ifdef DEBUG_LOGS
 	glDebugMessageCallback(openGLDebugCallback, nullptr);
