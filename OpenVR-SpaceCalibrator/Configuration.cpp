@@ -304,7 +304,7 @@ static void WriteProfile(CalibrationContext &ctx, std::ostream &out)
 static void LogRegistryResult(LSTATUS result)
 {
 	char *message;
-	FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, result, LANG_USER_DEFAULT, (LPSTR)&message, 0, NULL);
+	FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_ALLOCATE_BUFFER, 0, result, LANG_USER_DEFAULT, (LPSTR)&message, 0, nullptr);
 	std::cerr << "Opening registry key: " << message << std::endl;
 }
 

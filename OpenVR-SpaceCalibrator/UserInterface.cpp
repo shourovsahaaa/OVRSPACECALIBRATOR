@@ -191,7 +191,7 @@ void CCal_DrawSettings() {
 		
 			auto speed = CalCtx.calibrationSpeed;
 
-			ImGui::Columns(3, NULL, false);
+			ImGui::Columns(3, nullptr, false);
 			if (ImGui::RadioButton(" Fast          ", speed == CalibrationContext::FAST)) {
 				CalCtx.calibrationSpeed = CalibrationContext::FAST;
 			}
@@ -391,12 +391,10 @@ void CCal_BasicInfo() {
 		if (CalCtx.referenceID < 0) {
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, 0xFF000080);
 			status = "NOT FOUND";
-		}
-		else if (!CalCtx.ReferencePoseIsValidSimple()) {
+		} else if (!CalCtx.ReferencePoseIsValidSimple()) {
 			ImGui::TableSetBgColor(ImGuiTableBgTarget_CellBg, 0xFFFF0080);
 			status = "NOT TRACKING";
-		}
-		else {
+		} else {
 			status = "OK";
 		}
 		ImGui::Text("Status: %s", status);
@@ -555,7 +553,7 @@ void BuildMenu(bool runningInOverlay)
 		ImGui::Text("");
 		auto speed = CalCtx.calibrationSpeed;
 
-		ImGui::Columns(4, NULL, false);
+		ImGui::Columns(4, nullptr, false);
 		ImGui::Text("Calibration Speed");
 
 		ImGui::NextColumn();

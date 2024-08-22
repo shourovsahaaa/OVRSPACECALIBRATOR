@@ -138,7 +138,7 @@ namespace {
 
 	void G_PosOffset_RawComputed() {
 		if (ImPlot::BeginPlot("##posOffsetRawComputed")) {
-			ImPlot::SetupAxes(NULL, "mm", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			ImPlot::SetupAxes(nullptr, "mm", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, -200, 200, ImGuiCond_Appearing);
 
@@ -152,7 +152,7 @@ namespace {
 
 	void G_PosOffset_CurrentCal() {
 		if (ImPlot::BeginPlot("##posOffsetCurrentCal")) {
-			ImPlot::SetupAxes(NULL, "mm", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			ImPlot::SetupAxes(nullptr, "mm", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, -200, 200, ImGuiCond_Appearing);
 
@@ -166,7 +166,7 @@ namespace {
 
 	void G_PosOffset_LastSample() {
 		if (ImPlot::BeginPlot("##posOffsetLastSample")) {
-			ImPlot::SetupAxes(NULL, "mm", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			ImPlot::SetupAxes(nullptr, "mm", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, -200, 200, ImGuiCond_Appearing);
 
@@ -180,7 +180,7 @@ namespace {
 
 	void G_PosOffset_ByRelPose() {
 		if (ImPlot::BeginPlot("##posOffsetByRelPose")) {
-			ImPlot::SetupAxes(NULL, "mm", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			ImPlot::SetupAxes(nullptr, "mm", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, -200, 200, ImGuiCond_Appearing);
 
@@ -194,7 +194,7 @@ namespace {
 
 	void G_PosOffset_PosError() {
 		if (ImPlot::BeginPlot("##Position error")) {
-			ImPlot::SetupAxes(NULL, "mm (RMS)");
+			ImPlot::SetupAxes(nullptr, "mm (RMS)");
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 25, ImGuiCond_Appearing);
 
@@ -210,7 +210,7 @@ namespace {
 
 	void G_ComputationTime() {
 		if (ImPlot::BeginPlot("##Computation Time", ImVec2(-1, 0), ImPlotFlags_NoLegend)) {
-			ImPlot::SetupAxes(NULL, "ms", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			ImPlot::SetupAxes(nullptr, "ms", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 200, ImGuiCond_Appearing);
 
@@ -223,7 +223,7 @@ namespace {
 
 	void G_JitterReference() {
 		if (ImPlot::BeginPlot("##JitterReference", ImVec2(-1, 0), ImPlotFlags_NoLegend)) {
-			ImPlot::SetupAxes(NULL, NULL, 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			ImPlot::SetupAxes(nullptr, "", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 10, ImGuiCond_Appearing);
 
@@ -236,7 +236,7 @@ namespace {
 
 	void G_JitterTarget() {
 		if (ImPlot::BeginPlot("##JitterTarget", ImVec2(-1, 0), ImPlotFlags_NoLegend)) {
-			ImPlot::SetupAxes(NULL, NULL, 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
+			ImPlot::SetupAxes(nullptr, "", 0, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_RangeFit);
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 10, ImGuiCond_Appearing);
 
@@ -267,7 +267,7 @@ namespace {
 		}
 
 		if (ImPlot::BeginPlot("##Axis variance", ImVec2(-1, 0), ImPlotFlags_NoLegend)) {
-			ImPlot::SetupAxes(NULL, NULL, 0, 0);
+			ImPlot::SetupAxes(nullptr, nullptr, 0, 0);
 			SetupXAxis();
 			ImPlot::SetupAxisLimits(ImAxis_Y1, 0, 0.003, ImGuiCond_Always);
 

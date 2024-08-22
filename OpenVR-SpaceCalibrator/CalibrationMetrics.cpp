@@ -123,8 +123,8 @@ namespace Metrics {
 	}
 
 	static bool OpenLogFile() {
-		PWSTR RootPath = NULL;
-		if (S_OK != SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, NULL, &RootPath)) {
+		PWSTR RootPath = nullptr;
+		if (S_OK != SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, nullptr, &RootPath)) {
 			CoTaskMemFree(RootPath);
 			return false;
 		}
@@ -147,11 +147,11 @@ namespace Metrics {
 		SYSTEMTIME now;
 		GetSystemTime(&now);
 
-		size_t dateBufLen = GetDateFormatW(LOCALE_USER_DEFAULT, 0, &now, L"yyyy-MM-dd", NULL, 0);
+		size_t dateBufLen = GetDateFormatW(LOCALE_USER_DEFAULT, 0, &now, L"yyyy-MM-dd", nullptr, 0);
 		std::vector<WCHAR> dateBuf(dateBufLen);
-		if (!GetDateFormatEx(LOCALE_NAME_INVARIANT, 0, &now, L"yyyy-MM-dd", &dateBuf[0], dateBufLen, NULL)) return false;
+		if (!GetDateFormatEx(LOCALE_NAME_INVARIANT, 0, &now, L"yyyy-MM-dd", &dateBuf[0], dateBufLen, nullptr)) return false;
 		
-		size_t timeBufLen = GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &now, L"HH-mm-ss", NULL, 0);
+		size_t timeBufLen = GetTimeFormatW(LOCALE_USER_DEFAULT, 0, &now, L"HH-mm-ss", nullptr, 0);
 		std::vector<WCHAR> timeBuf(timeBufLen);
 		if (!GetTimeFormatEx(LOCALE_NAME_INVARIANT, 0, &now, L"HH-mm-ss", &timeBuf[0], timeBufLen)) return false;
 

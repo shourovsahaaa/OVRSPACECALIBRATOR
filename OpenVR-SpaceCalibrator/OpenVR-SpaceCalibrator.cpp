@@ -76,7 +76,7 @@ void CreateGLFWWindow()
 	fboTextureWidth = 1200;
 	fboTextureHeight = 800;
 
-	glfwWindow = glfwCreateWindow(fboTextureWidth, fboTextureHeight, "OpenVR-SpaceCalibrator", NULL, NULL);
+	glfwWindow = glfwCreateWindow(fboTextureWidth, fboTextureHeight, "OpenVR-SpaceCalibrator", nullptr, nullptr);
 	if (!glfwWindow)
 		throw std::runtime_error("Failed to create window");
 
@@ -262,7 +262,7 @@ void RunLoop()
 
 				if (textInfo != nullptr) {
 					textBuf[0] = 0;
-					int len = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)textInfo->TextW.Data, textInfo->TextW.Size, textBuf, sizeof(textBuf), NULL, NULL);
+					int len = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)textInfo->TextW.Data, textInfo->TextW.Size, textBuf, sizeof(textBuf), nullptr, nullptr);
 					textBuf[min(len, sizeof(textBuf) - 1)] = 0;
 
 					uint32_t unFlags = 0; // EKeyboardFlags 
@@ -300,11 +300,11 @@ void RunLoop()
 
 					int id = ImGui::GetActiveID();
 					auto textInfo = ImGui::GetInputTextState(id);
-					int bufSize = MultiByteToWideChar(CP_ACP, 0, textBuf, -1, NULL, 0);
+					int bufSize = MultiByteToWideChar(CP_ACP, 0, textBuf, -1, nullptr, 0);
 					textInfo->TextW.resize(bufSize);
 					MultiByteToWideChar(CP_ACP, 0, textBuf, -1, (LPWSTR)textInfo->TextW.Data, bufSize);
 					textInfo->CurLenW = bufSize;
-					textInfo->CurLenA = WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)textInfo->TextW.Data, textInfo->TextW.Size, NULL, 0, NULL, NULL);
+					textInfo->CurLenA = WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)textInfo->TextW.Data, textInfo->TextW.Size, nullptr, 0, nullptr, nullptr);
 					
 					keyboardJustClosed = true;
 					break;
