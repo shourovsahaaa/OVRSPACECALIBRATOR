@@ -103,7 +103,7 @@ void BuildContinuousCalDisplay() {
 
 	ImVec2 contentRegion;
 	contentRegion.x = ImGui::GetWindowContentRegionWidth();
-	contentRegion.y = ImGui::GetWindowHeight() - ImGui::GetFrameHeightWithSpacing() * 2.1;
+	contentRegion.y = ImGui::GetWindowHeight() - ImGui::GetFrameHeightWithSpacing() * 2.1f;
 
 	if (!ImGui::BeginChild("CCalDisplayFrame", contentRegion, false)) {
 		ImGui::EndChild();
@@ -150,9 +150,9 @@ static void ScaledDragFloat(const char* label, double& f, double scale, double m
 		ImGui::PushID((std::string(label) + "_id").c_str());
 		// Line up to a column, multiples of 100
 		constexpr uint32_t LABEL_CURSOR = 100;
-		uint32_t cursorPosX = ImGui::GetCursorPosX();
+		uint32_t cursorPosX = (int) ImGui::GetCursorPosX();
 		uint32_t roundedPosition = ((cursorPosX + LABEL_CURSOR / 2) / LABEL_CURSOR) * LABEL_CURSOR;
-		ImGui::SetCursorPosX(roundedPosition);
+		ImGui::SetCursorPosX((float) roundedPosition);
 		ImGui::SliderFloat((std::string("##") + label).c_str(), &v, (float)min, (float)max, "%1.2f", flags);
 		ImGui::PopID();
 	}
@@ -656,7 +656,7 @@ void BuildSystemSelection(const VRState &state)
 		if (CalCtx.state == CalibrationState::ContinuousStandby) {
 			auto iter = std::find(state.trackingSystems.begin(), state.trackingSystems.end(), CalCtx.referenceStandby.trackingSystem);
 			if (iter != state.trackingSystems.end()) {
-				currentReferenceSystem = iter - state.trackingSystems.begin();
+				currentReferenceSystem = (int) (iter - state.trackingSystems.begin());
 			}
 		}
 		else {
@@ -678,7 +678,7 @@ void BuildSystemSelection(const VRState &state)
 		if (CalCtx.state == CalibrationState::ContinuousStandby) {
 			auto iter = std::find(state.trackingSystems.begin(), state.trackingSystems.end(), CalCtx.targetStandby.trackingSystem);
 			if (iter != state.trackingSystems.end()) {
-				currentTargetSystem = iter - state.trackingSystems.begin();
+				currentTargetSystem = (int) (iter - state.trackingSystems.begin());
 			}
 		}
 		else {

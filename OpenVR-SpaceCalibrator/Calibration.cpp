@@ -430,9 +430,9 @@ void CalibrationTick(double time)
 		// std::cerr << "HMD tracking didn't update, skipping update" << std::endl;
 		return;
 	}
-	ctx.xprev = p[0];
-	ctx.yprev = p[1];
-	ctx.zprev = p[2];
+	ctx.xprev = (float) p[0];
+	ctx.yprev = (float) p[1];
+	ctx.zprev = (float) p[2];
 
 	if (ctx.state == CalibrationState::None || ctx.state == CalibrationState::ContinuousStandby
 		|| (ctx.state == CalibrationState::Continuous && !calibration.isValid()))
@@ -569,7 +569,7 @@ void CalibrationTick(double time)
 		return;
 	}
 
-	CalCtx.Progress(calibration.SampleCount(), (int)CalCtx.SampleCount());
+	CalCtx.Progress((int) calibration.SampleCount(), (int)CalCtx.SampleCount());
 
 	while (calibration.SampleCount() > CalCtx.SampleCount()) calibration.ShiftSample();
 
