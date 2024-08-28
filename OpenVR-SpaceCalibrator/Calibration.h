@@ -49,7 +49,7 @@ struct CalibrationContext
 	bool requireTriggerPressToApply = false;
 	double timeLastTick = 0, timeLastScan = 0;
 	double wantedUpdateInterval = 1.0;
-	float jitterThreshold = 0.1f;
+	float jitterThreshold = 3.0f;
 
 	float xprev, yprev, zprev;
 
@@ -93,6 +93,7 @@ struct CalibrationContext
 		alignmentSpeedParams.align_speed_large = 2.0f;
 
 		continuousCalibrationThreshold = 1.5f;
+		jitterThreshold = 3.0f;
 
 		continuousCalibrationOffset = Eigen::Vector3d::Zero();
 
