@@ -14,7 +14,7 @@
 #include "imgui_extensions.h"
 
 void TextWithWidth(const char *label, const char *text, float width);
-void DrawVectorElement(const std::string id, const char* text, double* value, int defaultValue = 0);
+void DrawVectorElement(const std::string id, const char* text, double* value, int defaultValue = 0, const char* defaultValueStr = " 0 ");
 
 VRState LoadVRState();
 void BuildSystemSelection(const VRState &state);
@@ -314,7 +314,7 @@ void CCal_DrawSettings() {
 			// Playspace offset
 			ImVec2 panel_size_inner{ panel_size.x - 11 * 2, 0 };
 			ImGui::BeginGroupPanel("Playspace scale", panel_size_inner);
-			DrawVectorElement("cc_playspace_scale", "PLayspace Scale", &CalCtx.calibratedScale);
+			DrawVectorElement("cc_playspace_scale", "PLayspace Scale", &CalCtx.calibratedScale, 1, " 1 ");
 			ImGui::EndGroupPanel();
 		}
 
@@ -344,7 +344,7 @@ void CCal_DrawSettings() {
 	}
 }
 
-void DrawVectorElement(const std::string id, const char* text, double* value, int defaultValue) {
+void DrawVectorElement(const std::string id, const char* text, double* value, int defaultValue, const char* defaultValueStr) {
 	constexpr float CONTINUOUS_CALIBRATION_TRACKER_OFFSET_DELTA = 0.01f;
 
 	ImGui::Text(text);
@@ -352,8 +352,8 @@ void DrawVectorElement(const std::string id, const char* text, double* value, in
 	ImGui::SameLine();
 
 	ImGui::PushID((id + text + "_btn_reset").c_str());
-	if (ImGui::Button(" 0 ")) {
-		*value *= 0;
+	if (ImGui::Button(defaultValueStr)) {
+		*value *= defaultValue;
 	}
 	ImGui::PopID();
 	ImGui::SameLine();
