@@ -125,8 +125,7 @@ std::vector<bool> CalibrationCalc::DetectOutliers() const {
 	// Use bigger step to get a rough rotation.
 	std::vector<DSample> deltas;
 	const size_t step = 5;
-	for (size_t i = 0; i < m_samples.size(); i += step)
-	{
+	for (size_t i = 0; i < m_samples.size(); i += step) {
 		for (size_t j = 0; j < i; j += step)
 		{
 			auto delta = DeltaRotationSamples(m_samples[i], m_samples[j]);
@@ -140,8 +139,7 @@ std::vector<bool> CalibrationCalc::DetectOutliers() const {
 	Eigen::MatrixXd refPoints(deltas.size(), 3), targetPoints(deltas.size(), 3);
 	Eigen::Vector3d refCentroid(0, 0, 0), targetCentroid(0, 0, 0);
 
-	for (size_t i = 0; i < deltas.size(); i++)
-	{
+	for (size_t i = 0; i < deltas.size(); i++) {
 		refPoints.row(i) = deltas[i].ref;
 		refCentroid += deltas[i].ref;
 		targetPoints.row(i) = deltas[i].target;
@@ -151,8 +149,7 @@ std::vector<bool> CalibrationCalc::DetectOutliers() const {
 	refCentroid /= (double)deltas.size();
 	targetCentroid /= (double)deltas.size();
 
-	for (size_t i = 0; i < deltas.size(); i++)
-	{
+	for (size_t i = 0; i < deltas.size(); i++) {
 		refPoints.row(i) -= refCentroid;
 		targetPoints.row(i) -= targetCentroid;
 	}
@@ -163,8 +160,7 @@ std::vector<bool> CalibrationCalc::DetectOutliers() const {
 	auto svd = bdcsvd.compute(crossCV, Eigen::ComputeThinU | Eigen::ComputeThinV);
 
 	Eigen::Matrix3d i = Eigen::Matrix3d::Identity();
-	if ((svd.matrixU() * svd.matrixV().transpose()).determinant() < 0)
-	{
+	if ((svd.matrixU() * svd.matrixV().transpose()).determinant() < 0) {
 		i(2, 2) = -1;
 	}
 
@@ -177,8 +173,7 @@ std::vector<bool> CalibrationCalc::DetectOutliers() const {
 	Eigen::VectorXd constraints(m_samples.size() * 4);
 	std::vector<bool> valids(m_samples.size());
 	Eigen::Matrix4d I4 = Eigen::Matrix4d::Identity();
-	for (size_t i = 0; i < m_samples.size(); i++)
-	{
+	for (size_t i = 0; i < m_samples.size(); i++) {
 		Eigen::Matrix3d rotExtTmp = (m_samples[i].ref.rot.transpose() * rot * m_samples[i].target.rot);
 		Eigen::Quaterniond quatExtTmp(rotExtTmp);
 		quatExtTmp.normalize();
@@ -191,15 +186,13 @@ std::vector<bool> CalibrationCalc::DetectOutliers() const {
 	Eigen::Matrix3d extRot = quatExt.toRotationMatrix();
 	const double threshold = 0.99;
 
-	for (size_t i = 0; i < m_samples.size(); i++)
-	{
+	for (size_t i = 0; i < m_samples.size(); i++) {
 		Eigen::Matrix3d rotExtTmp = (m_samples[i].ref.rot.transpose() * rot * m_samples[i].target.rot);
 		Eigen::Quaterniond quatExtTmp(rotExtTmp);
 		double cosHalfAngle = quatExtTmp.w() * quatExt.w() + quatExtTmp.vec().dot(quatExt.vec());
 		if (abs(cosHalfAngle) < threshold) {
 			valids[i] = false;
-		}
-		else {
+		} else {
 			valids[i] = true;
 		}
 	}
@@ -210,16 +203,15 @@ Eigen::Vector3d CalibrationCalc::CalibrateRotation() const {
 	std::vector<DSample> deltas;
 	std::vector<bool> valids = DetectOutliers();
 
-	for (size_t i = 0; i < m_samples.size(); i++)
-	{
-		for (size_t j = 0; j < i; j++)
-		{
+	for (size_t i = 0; i < m_samples.size(); i++) {
+		for (size_t j = 0; j < i; j++) {
 			if (!valids[i] || !valids[j]) {
 				continue;
 			}
 			auto delta = DeltaRotationSamples(m_samples[i], m_samples[j]);
-			if (delta.valid)
+			if (delta.valid) {
 				deltas.push_back(delta);
+			}
 		}
 	}
 	//char buf[256];
