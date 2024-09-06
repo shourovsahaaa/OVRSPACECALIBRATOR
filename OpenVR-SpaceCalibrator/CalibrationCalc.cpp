@@ -121,13 +121,102 @@ void CalibrationCalc::Clear() {
 	m_relativePosCalibrated = false;
 }
 
+std::vector<bool> CalibrationCalc::DetectOutliers() const {
+	// Use bigger step to get a rough rotation.
+	std::vector<DSample> deltas;
+	const size_t step = 5;
+	for (size_t i = 0; i < m_samples.size(); i += step)
+	{
+		for (size_t j = 0; j < i; j += step)
+		{
+			auto delta = DeltaRotationSamples(m_samples[i], m_samples[j]);
+			if (delta.valid) {
+				deltas.push_back(delta);
+			}
+		}
+	}
+
+	// Kabsch algorithm
+	Eigen::MatrixXd refPoints(deltas.size(), 3), targetPoints(deltas.size(), 3);
+	Eigen::Vector3d refCentroid(0, 0, 0), targetCentroid(0, 0, 0);
+
+	for (size_t i = 0; i < deltas.size(); i++)
+	{
+		refPoints.row(i) = deltas[i].ref;
+		refCentroid += deltas[i].ref;
+		targetPoints.row(i) = deltas[i].target;
+		targetCentroid += deltas[i].target;
+	}
+
+	refCentroid /= (double)deltas.size();
+	targetCentroid /= (double)deltas.size();
+
+	for (size_t i = 0; i < deltas.size(); i++)
+	{
+		refPoints.row(i) -= refCentroid;
+		targetPoints.row(i) -= targetCentroid;
+	}
+
+	auto crossCV = refPoints.transpose() * targetPoints;
+
+	Eigen::BDCSVD<Eigen::MatrixXd> bdcsvd;
+	auto svd = bdcsvd.compute(crossCV, Eigen::ComputeThinU | Eigen::ComputeThinV);
+
+	Eigen::Matrix3d i = Eigen::Matrix3d::Identity();
+	if ((svd.matrixU() * svd.matrixV().transpose()).determinant() < 0)
+	{
+		i(2, 2) = -1;
+	}
+
+	Eigen::Matrix3d rot = svd.matrixV() * i * svd.matrixU().transpose();
+	rot.transposeInPlace();
+
+	// Optimize an extrinsic from reference to target.
+	// Detect the outliers by comparing the extrinc computed from each pair of rotation to the optimized extrinsic. 
+	Eigen::MatrixXd coefficients(m_samples.size() * 4, 4);
+	Eigen::VectorXd constraints(m_samples.size() * 4);
+	std::vector<bool> valids(m_samples.size());
+	Eigen::Matrix4d I4 = Eigen::Matrix4d::Identity();
+	for (size_t i = 0; i < m_samples.size(); i++)
+	{
+		Eigen::Matrix3d rotExtTmp = (m_samples[i].ref.rot.transpose() * rot * m_samples[i].target.rot);
+		Eigen::Quaterniond quatExtTmp(rotExtTmp);
+		quatExtTmp.normalize();
+		coefficients.block<4, 4>(4 * i, 0) = Eigen::Matrix4d::Identity();
+		constraints.block<4, 1>(4 * i, 0) = Eigen::Vector4d(quatExtTmp.w(), quatExtTmp.x(), quatExtTmp.y(), quatExtTmp.z());
+	}
+	Eigen::Vector4d result = coefficients.bdcSvd(Eigen::ComputeThinU | Eigen::ComputeThinV).solve(constraints);
+	Eigen::Quaterniond quatExt(result(0), result(1), result(2), result(3));
+	quatExt.normalize();
+	Eigen::Matrix3d extRot = quatExt.toRotationMatrix();
+	const double threshold = 0.99;
+
+	for (size_t i = 0; i < m_samples.size(); i++)
+	{
+		Eigen::Matrix3d rotExtTmp = (m_samples[i].ref.rot.transpose() * rot * m_samples[i].target.rot);
+		Eigen::Quaterniond quatExtTmp(rotExtTmp);
+		double cosHalfAngle = quatExtTmp.w() * quatExt.w() + quatExtTmp.vec().dot(quatExt.vec());
+		if (abs(cosHalfAngle) < threshold) {
+			valids[i] = false;
+		}
+		else {
+			valids[i] = true;
+		}
+	}
+	return valids;
+}
+
 Eigen::Vector3d CalibrationCalc::CalibrateRotation() const {
 	std::vector<DSample> deltas;
+	std::vector<bool> valids = DetectOutliers();
 
 	for (size_t i = 0; i < m_samples.size(); i++)
 	{
 		for (size_t j = 0; j < i; j++)
 		{
+			if (!valids[i] || !valids[j]) {
+				continue;
+			}
 			auto delta = DeltaRotationSamples(m_samples[i], m_samples[j]);
 			if (delta.valid)
 				deltas.push_back(delta);

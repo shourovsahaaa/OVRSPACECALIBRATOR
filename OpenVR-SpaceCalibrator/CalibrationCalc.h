@@ -129,6 +129,7 @@ private:
 
 	std::deque<Sample> m_samples;
 
+	std::vector<bool> DetectOutliers() const;
 	Eigen::Vector3d CalibrateRotation() const;
 	Eigen::Vector3d CalibrateTranslation(const Eigen::Matrix3d &rotation) const;
 	void CalibrateScaleOffset(const Eigen::Matrix3d &rotation, Eigen::Vector3d* out_scaleOffset, float* out_scaleFactor) const;
