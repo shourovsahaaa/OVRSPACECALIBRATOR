@@ -105,8 +105,12 @@ struct CalibrationContext
 		bool valid = false;
 		bool autoApply = true;
 		std::vector<vr::HmdQuad_t> geometry;
-		vr::HmdMatrix34_t standingCenter;
-		vr::HmdVector2_t playSpaceSize;
+		vr::HmdMatrix34_t standingCenter = {
+			1.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f, 0.0f, 0.0f,
+			0.0f, 0.0f, 1.0f, 0.0f,
+		};
+		vr::HmdVector2_t playSpaceSize = { 0.0f, 0.0f };
 	} chaperone;
 
 	void ClearLogOnMessage() {

@@ -107,7 +107,7 @@ void CreateGLFWWindow()
 	EnableDarkModeTopBar(windowHwmd);
 
 	// Load icon and set it in the window
-	GLFWimage images[1];
+	GLFWimage images[1] = {};
 	std::string iconPath = cwd;
 	iconPath += "\\icon.png";
 	images[0].pixels = stbi_load(iconPath.c_str(), &images[0].width, &images[0].height, 0, 4);
@@ -311,10 +311,10 @@ void RunLoop()
 					io.AddMousePosEvent(vrEvent.data.mouse.x, vrEvent.data.mouse.y);
 					break;
 				case vr::VREvent_MouseButtonDown:
-					io.AddMouseButtonEvent(vrEvent.data.mouse.button == vr::VRMouseButton_Left ? 0 : 1, true);
+					io.AddMouseButtonEvent((vrEvent.data.mouse.button & vr::VRMouseButton_Left) == vr::VRMouseButton_Left ? 0 : 1, true);
 					break;
 				case vr::VREvent_MouseButtonUp:
-					io.AddMouseButtonEvent(vrEvent.data.mouse.button == vr::VRMouseButton_Left ? 0 : 1, false);
+					io.AddMouseButtonEvent((vrEvent.data.mouse.button & vr::VRMouseButton_Left) == vr::VRMouseButton_Left ? 0 : 1, false);
 					break;
 				case vr::VREvent_ScrollDiscrete:
 				{
@@ -379,7 +379,7 @@ void RunLoop()
 
 			if (dashboardVisible)
 			{
-				vr::Texture_t vrTex;
+				vr::Texture_t vrTex = { 0 };
 				vrTex.eType = vr::TextureType_OpenGL;
 				vrTex.eColorSpace = vr::ColorSpace_Auto;
 
@@ -426,7 +426,9 @@ void RunLoop()
 
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
-	_getcwd(cwd, MAX_PATH);
+	if (_getcwd(cwd, MAX_PATH) == nullptr) {
+		// @TODO: Handle Invalid working dir case. Should never happen but you never know 
+	}
 	HandleCommandLine(lpCmdLine);
 
 #ifdef DEBUG_LOGS
