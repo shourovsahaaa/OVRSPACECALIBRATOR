@@ -10,11 +10,14 @@
 #include <imgui/imgui_impl_opengl3.h>
 #include <implot/implot.h>
 #include <GL/gl3w.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
 #include <openvr.h>
 #include <direct.h>
 #include <chrono>
 #include <thread>
+#include <dwmapi.h>
 
 #include <stb_image.h>
 
@@ -63,6 +66,19 @@ static int fboTextureWidth = 0, fboTextureHeight = 0;
 static char cwd[MAX_PATH];
 const float MINIMIZED_MAX_FPS = 60.0f;
 
+enum DWMA_USE_IMMSERSIVE_DARK_MODE_ENUM {
+	DWMA_USE_IMMERSIVE_DARK_MODE = 20,
+	DWMA_USE_IMMERSIVE_DARK_MODE_PRE_20H1 = 19,
+};
+
+const bool EnableDarkModeTopBar(const HWND windowHwmd) {
+	const BOOL darkBorder = TRUE;
+	const bool ok =
+		SUCCEEDED(DwmSetWindowAttribute(windowHwmd, DWMA_USE_IMMERSIVE_DARK_MODE, &darkBorder, sizeof(darkBorder)))
+		|| SUCCEEDED(DwmSetWindowAttribute(windowHwmd, DWMA_USE_IMMERSIVE_DARK_MODE_PRE_20H1, &darkBorder, sizeof(darkBorder)));
+	return ok;
+}
+
 void CreateGLFWWindow()
 {
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -87,6 +103,8 @@ void CreateGLFWWindow()
 
 	// Minimise the window
 	glfwIconifyWindow(glfwWindow);
+	HWND windowHwmd = glfwGetWin32Window(glfwWindow);
+	EnableDarkModeTopBar(windowHwmd);
 
 	// Load icon and set it in the window
 	GLFWimage images[1];
