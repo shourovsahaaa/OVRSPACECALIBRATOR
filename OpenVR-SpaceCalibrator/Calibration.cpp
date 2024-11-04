@@ -600,7 +600,6 @@ void CalibrationTick(double time)
 	}
 	else {
 		calibration.enableStaticRecalibration = false;
-		calibration.ComputeOneshot();
 		calibration.ComputeOneshot(CalCtx.ignoreOutliers);
 	}
 

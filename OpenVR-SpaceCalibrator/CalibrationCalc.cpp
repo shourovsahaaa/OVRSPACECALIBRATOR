@@ -220,42 +220,42 @@ Eigen::Vector3d CalibrationCalc::CalibrateRotation(const bool ignoreOutliers) co
 
 	// Kabsch algorithm
 
-    // Initialize 2D points and centroids
-    Eigen::MatrixXd refPoints(deltas.size(), 2), targetPoints(deltas.size(), 2);
-    Eigen::Vector2d refCentroid(0, 0), targetCentroid(0, 0);
+	// Initialize 2D points and centroids
+	Eigen::MatrixXd refPoints(deltas.size(), 2), targetPoints(deltas.size(), 2);
+	Eigen::Vector2d refCentroid(0, 0), targetCentroid(0, 0);
 
-    // Fill matrices and calculate centroids
-    for (size_t i = 0; i < deltas.size(); i++) {
-        refPoints.row(i) << deltas[i].ref[0], deltas[i].ref[2];  // Take only the x and z components
-        refCentroid += refPoints.row(i);
+	// Fill matrices and calculate centroids
+	for (size_t i = 0; i < deltas.size(); i++) {
+		refPoints.row(i) << deltas[i].ref[0], deltas[i].ref[2];  // Take only the x and z components
+		refCentroid += refPoints.row(i);
 
-        targetPoints.row(i) << deltas[i].target[0], deltas[i].target[2];  // Take only the x and z components
-        targetCentroid += targetPoints.row(i);
-    }
+		targetPoints.row(i) << deltas[i].target[0], deltas[i].target[2];  // Take only the x and z components
+		targetCentroid += targetPoints.row(i);
+	}
 
-    refCentroid /= (double)deltas.size();
-    targetCentroid /= (double)deltas.size();
+	refCentroid /= (double)deltas.size();
+	targetCentroid /= (double)deltas.size();
 
-    // Center the points
-    for (size_t i = 0; i < deltas.size(); i++) {
-        refPoints.row(i) -= refCentroid;
-        targetPoints.row(i) -= targetCentroid;
-    }
+	// Center the points
+	for (size_t i = 0; i < deltas.size(); i++) {
+		refPoints.row(i) -= refCentroid;
+		targetPoints.row(i) -= targetCentroid;
+	}
 
-    // Calculate cross-covariance matrix
-    auto crossCV = refPoints.transpose() * targetPoints;
+	// Calculate cross-covariance matrix
+	auto crossCV = refPoints.transpose() * targetPoints;
 
-    // Singular Value Decomposition (SVD)
-    Eigen::JacobiSVD<Eigen::MatrixXd> svd(crossCV, Eigen::ComputeThinU | Eigen::ComputeThinV);
+	// Singular Value Decomposition (SVD)
+	Eigen::JacobiSVD<Eigen::MatrixXd> svd(crossCV, Eigen::ComputeThinU | Eigen::ComputeThinV);
 
-    // Calculate 2D rotation matrix
-    Eigen::Matrix2d i = Eigen::Matrix2d::Identity();
-    Eigen::Matrix2d rot = svd.matrixV() * i * svd.matrixU().transpose();
+	// Calculate 2D rotation matrix
+	Eigen::Matrix2d i = Eigen::Matrix2d::Identity();
+	Eigen::Matrix2d rot = svd.matrixV() * i * svd.matrixU().transpose();
 
-    // Calculate yaw angle in radians
-    double yaw = std::atan2(rot(1, 0), rot(0, 0));
+	// Calculate yaw angle in radians
+	double yaw = std::atan2(rot(1, 0), rot(0, 0));
 
-    // Convert to degrees
+	// Convert to degrees
 	Eigen::Vector3d euler(0.0, yaw * 180.0 / EIGEN_PI, 0.0);
 
 	//snprintf(buf, sizeof buf, "Calibrated rotation: yaw=%.2f pitch=%.2f roll=%.2f\n", euler[1], euler[2], euler[0]);
@@ -672,48 +672,50 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 		Eigen::AffineCompact3d byRelPose;
 		double relPoseError = INFINITY;
 		Eigen::Vector3d relPosOffset;
-		CalibrateByRelPose(byRelPose);
-		ValidateCalibration(byRelPose, &relPoseError, &relPosOffset);
-		Metrics::posOffset_byRelPose.Push(relPosOffset * 1000);
-		Metrics::error_byRelPose.Push(relPoseError * 1000);
+		if (CalibrateByRelPose(byRelPose) &&
+			ValidateCalibration(byRelPose, &relPoseError, &relPosOffset)) {
 
-		m_isValid = true;
-		m_estimatedTransformation = byRelPose;
-		return true;
+			Metrics::posOffset_byRelPose.Push(relPosOffset * 1000);
+			Metrics::error_byRelPose.Push(relPoseError * 1000);
+
+			m_isValid = true;
+			m_estimatedTransformation = byRelPose;
+			return true;
+		}
 	}
 
 	double priorCalibrationError = INFINITY;
 	Eigen::Vector3d priorPosOffset;
-    if (m_isValid) {
-        ValidateCalibration(m_estimatedTransformation, &priorCalibrationError, &priorPosOffset);
-		
-        Metrics::posOffset_currentCal.Push(priorPosOffset * 1000);
-        Metrics::error_currentCal.Push(priorCalibrationError * 1000);
+	if (m_isValid && ValidateCalibration(m_estimatedTransformation, &priorCalibrationError, &priorPosOffset)) {
+		Metrics::posOffset_currentCal.Push(priorPosOffset * 1000);
+		Metrics::error_currentCal.Push(priorCalibrationError * 1000);
 
-        if (priorCalibrationError < 0.005) {
-            return false;
-        }
-    }
+		if (priorCalibrationError < 0.005) {
+			return false;
+		}
+	}
+
 	double newError = INFINITY;
 	bool newCalibrationValid = false;
-    Eigen::AffineCompact3d byRelPose;
-    Eigen::AffineCompact3d calibration;
+	Eigen::AffineCompact3d byRelPose;
+	Eigen::AffineCompact3d calibration;
 	bool usingRelPose = false;
-    double relPoseError = INFINITY;
+	double relPoseError = INFINITY;
 
-    if (enableStaticRecalibration && CalibrateByRelPose(byRelPose)) {
+	if (enableStaticRecalibration && CalibrateByRelPose(byRelPose)) {
 		Eigen::Vector3d relPosOffset;
-		ValidateCalibration(byRelPose, &relPoseError, &relPosOffset);
-        Metrics::posOffset_byRelPose.Push(relPosOffset * 1000);
-        Metrics::error_byRelPose.Push(relPoseError * 1000);
-		
-		if (relPoseError < 0.010 || m_relativePosCalibrated && relPoseError < 0.025) {
-			newCalibrationValid = true;
-			usingRelPose = true;
-			newError = relPoseError;
-			calibration = byRelPose;
-			if (relPoseError * threshold >= priorCalibrationError) {
-				return false;
+		if (ValidateCalibration(byRelPose, &relPoseError, &relPosOffset)) {
+			Metrics::posOffset_byRelPose.Push(relPosOffset * 1000);
+			Metrics::error_byRelPose.Push(relPoseError * 1000);
+
+			if (relPoseError < 0.010 || m_relativePosCalibrated && relPoseError < 0.025) {
+				newCalibrationValid = true;
+				usingRelPose = true;
+				newError = relPoseError;
+				calibration = byRelPose;
+				if (relPoseError * threshold >= priorCalibrationError) {
+					return false;
+				}
 			}
 		}
 	}
@@ -722,27 +724,27 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 	if (!newCalibrationValid) {
 		calibration = ComputeCalibration(ignoreOutliers);
 
-        newVariance = ComputeAxisVariance(calibration)(1);
+		newVariance = ComputeAxisVariance(calibration)(1);
 		Metrics::axisIndependence.Push(newVariance);
 
-        if (newVariance < AxisVarianceThreshold && newVariance < m_axisVariance) {
-            newCalibrationValid = false;
-        } else {
-            newCalibrationValid = ValidateCalibration(calibration, &newError, &m_posOffset);
-            Metrics::posOffset_rawComputed.Push(m_posOffset * 1000);
-        }
+		if (newVariance < AxisVarianceThreshold && newVariance < m_axisVariance) {
+			newCalibrationValid = false;
+		} else {
+			newCalibrationValid = ValidateCalibration(calibration, &newError, &m_posOffset);
+			Metrics::posOffset_rawComputed.Push(m_posOffset * 1000);
+		}
 
-        if (m_isValid) {
-            if (priorCalibrationError < newError * threshold) {
-                // If we have a more noisy calibration than before, avoid updating.
-                newCalibrationValid = false;
-            }
-        }
+		if (m_isValid) {
+			if (priorCalibrationError < newError * threshold) {
+				// If we have a more noisy calibration than before, avoid updating.
+				newCalibrationValid = false;
+			}
+		}
 
-        Metrics::error_rawComputed.Push(newError * 1000);
+		Metrics::error_rawComputed.Push(newError * 1000);
 		
 		ComputeInstantOffset();
-    }
+	}
 
 
 	
@@ -758,15 +760,15 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 	// Now, can we use the relative pose to perform a rapid correction?
     if (!newCalibrationValid) {
 		
-        double existingPoseErrorUsingRelPosition = RetargetingErrorRMS(m_refToTargetPose.translation(), m_estimatedTransformation);
-        Metrics::error_currentCalRelPose.Push(existingPoseErrorUsingRelPosition * 1000);
+		double existingPoseErrorUsingRelPosition = RetargetingErrorRMS(m_refToTargetPose.translation(), m_estimatedTransformation);
+		Metrics::error_currentCalRelPose.Push(existingPoseErrorUsingRelPosition * 1000);
 		if (relPoseError * threshold < existingPoseErrorUsingRelPosition || newCalibrationValid && relPoseError < newError) {
-		newCalibrationValid = true;
-        usingRelPose = true;
-        newError = relPoseError;
-        calibration = byRelPose;
+			newCalibrationValid = true;
+			usingRelPose = true;
+			newError = relPoseError;
+			calibration = byRelPose;
 		}
-    }
+	}
 
 	if (newCalibrationValid) {
 		lerp = m_isValid;
@@ -796,5 +798,3 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 		return false;
 	}
 }
-
-
