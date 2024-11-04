@@ -46,10 +46,13 @@ struct CalibrationContext
 	bool validProfile = false;
 	bool clearOnLog = false;
 	bool quashTargetInContinuous = false;
-	bool requireTriggerPressToApply = false;
-	double timeLastTick = 0, timeLastScan = 0;
+	double timeLastTick = 0, timeLastScan = 0, timeLastAssign = 0;
 	double wantedUpdateInterval = 1.0;
 	float jitterThreshold = 3.0f;
+
+	bool requireTriggerPressToApply = false;
+	bool wasWaitingForTriggers = false;
+	bool hasAppliedCalibrationResult = false;
 
 	float xprev, yprev, zprev;
 

@@ -374,6 +374,7 @@ void ScanAndApplyProfile(CalibrationContext &ctx)
 }
 
 void StartCalibration() {
+	CalCtx.hasAppliedCalibrationResult = false;
 	AssignTargets();
 	CalCtx.state = CalibrationState::Begin;
 	CalCtx.wantedUpdateInterval = 0.0;
@@ -383,6 +384,7 @@ void StartCalibration() {
 }
 
 void StartContinuousCalibration() {
+	CalCtx.hasAppliedCalibrationResult = false;
 	AssignTargets();
 	StartCalibration();
 	CalCtx.state = CalibrationState::Continuous;
@@ -415,6 +417,12 @@ void CalibrationTick(double time)
 
 	if (ctx.state == CalibrationState::Continuous || ctx.state == CalibrationState::ContinuousStandby) {
 		ctx.ClearLogOnMessage();
+
+		if (CalCtx.requireTriggerPressToApply && (time - ctx.timeLastAssign) > 10) {
+			// rescan devices every 10 seconds or so if we are using controller data
+			ctx.timeLastAssign = time;
+			AssignTargets();
+		}
 	}
 
 	ctx.timeLastTick = time;
@@ -541,7 +549,17 @@ void CalibrationTick(double time)
 		return;
 	}
 
-	if (CalCtx.state == CalibrationState::Continuous && CalCtx.requireTriggerPressToApply) {
+	if (!CollectSample(ctx))
+	{
+		return;
+	}
+
+	CalCtx.Progress((int) calibration.SampleCount(), (int)CalCtx.SampleCount());
+
+	if (calibration.SampleCount() < CalCtx.SampleCount()) return;
+	while (calibration.SampleCount() > CalCtx.SampleCount()) calibration.ShiftSample();
+
+	if (CalCtx.state == CalibrationState::Continuous && CalCtx.requireTriggerPressToApply && CalCtx.hasAppliedCalibrationResult) {
 		bool triggerPressed = true;
 		vr::VRControllerState_t state;
 		for (int i = 0; i < CalCtx.MAX_CONTROLLERS; i++) {
@@ -558,76 +576,71 @@ void CalibrationTick(double time)
 		}
 
 		if (!triggerPressed) {
-			ctx.wantedUpdateInterval = 0.5;
 			CalCtx.Log("Waiting for trigger press...\n");
+			CalCtx.wasWaitingForTriggers = true;
 			return;
 		}
+
+		if (CalCtx.wasWaitingForTriggers) {
+			CalCtx.Log("Triggers pressed, continuing calibration...\n");
+			CalCtx.wasWaitingForTriggers = false;
+		}
 	}
 
-	if (!CollectSample(ctx))
-	{
-		return;
+	LARGE_INTEGER start_time;
+	QueryPerformanceCounter(&start_time);
+		
+	bool lerp = false;
+
+	if (CalCtx.state == CalibrationState::Continuous) {
+		CalCtx.messages.clear();
+		calibration.enableStaticRecalibration = CalCtx.enableStaticRecalibration;
+		calibration.lockRelativePosition = CalCtx.lockRelativePosition;
+		calibration.ComputeIncremental(lerp, CalCtx.continuousCalibrationThreshold);
+	}
+	else {
+		calibration.enableStaticRecalibration = false;
+		calibration.ComputeOneshot();
 	}
 
-	CalCtx.Progress((int) calibration.SampleCount(), (int)CalCtx.SampleCount());
+	if (calibration.isValid()) {
+		ctx.calibratedRotation = calibration.EulerRotation();
+		ctx.calibratedTranslation = calibration.Transformation().translation() * 100.0; // convert to cm units for profile storage
+		ctx.refToTargetPose = calibration.RelativeTransformation();
+		ctx.relativePosCalibrated = calibration.isRelativeTransformationCalibrated();
 
-	while (calibration.SampleCount() > CalCtx.SampleCount()) calibration.ShiftSample();
+		auto vrTrans = VRTranslationVec(ctx.calibratedTranslation);
+		auto vrRot = VRRotationQuat(Eigen::Quaterniond(calibration.Transformation().rotation()));
 
-	if (calibration.SampleCount() >= CalCtx.SampleCount())
-	{
-		LARGE_INTEGER start_time;
-		QueryPerformanceCounter(&start_time);
+		ctx.validProfile = true;
+		SaveProfile(ctx);
+
+		ScanAndApplyProfile(ctx);
+
+		CalCtx.hasAppliedCalibrationResult = true;
+
+		CalCtx.Log("Finished calibration, profile saved\n");
+	} else {
+		CalCtx.Log("Calibration failed.\n");
+	}
+
+	LARGE_INTEGER end_time;
+	QueryPerformanceCounter(&end_time);
+	LARGE_INTEGER freq;
+	QueryPerformanceFrequency(&freq);
+	double duration = (end_time.QuadPart - start_time.QuadPart) / (double)freq.QuadPart;
+	Metrics::computationTime.Push(duration * 1000.0);
+
+	Metrics::WriteLogEntry();
 		
-		bool ok, lerp = false;
-
-		if (CalCtx.state == CalibrationState::Continuous) {
-			CalCtx.messages.clear();
-			calibration.enableStaticRecalibration = CalCtx.enableStaticRecalibration;
-			calibration.lockRelativePosition = CalCtx.lockRelativePosition;
-			ok = calibration.ComputeIncremental(lerp, CalCtx.continuousCalibrationThreshold);
-		}
-		else {
-			calibration.enableStaticRecalibration = false;
-			ok = calibration.ComputeOneshot();
-		}
-
-		if (calibration.isValid()) {
-			ctx.calibratedRotation = calibration.EulerRotation();
-			ctx.calibratedTranslation = calibration.Transformation().translation() * 100.0; // convert to cm units for profile storage
-			ctx.refToTargetPose = calibration.RelativeTransformation();
-			ctx.relativePosCalibrated = calibration.isRelativeTransformationCalibrated();
-
-			auto vrTrans = VRTranslationVec(ctx.calibratedTranslation);
-			auto vrRot = VRRotationQuat(Eigen::Quaterniond(calibration.Transformation().rotation()));
-
-			ctx.validProfile = true;
-			SaveProfile(ctx);
-
-			ScanAndApplyProfile(ctx);
-
-			CalCtx.Log("Finished calibration, profile saved\n");
-		} else {
-			CalCtx.Log("Calibration failed.\n");
-		}
-
-		LARGE_INTEGER end_time;
-		QueryPerformanceCounter(&end_time);
-		LARGE_INTEGER freq;
-		QueryPerformanceFrequency(&freq);
-		double duration = (end_time.QuadPart - start_time.QuadPart) / (double)freq.QuadPart;
-		Metrics::computationTime.Push(duration * 1000.0);
-
-		Metrics::WriteLogEntry();
-		
-		if (CalCtx.state != CalibrationState::Continuous) {
-			ctx.state = CalibrationState::None;
-			calibration.Clear();
-		}
-		else {
-			size_t drop_samples = CalCtx.SampleCount() / 10;
-			for (int i = 0; i < drop_samples; i++) {
-				calibration.ShiftSample();
-			}
+	if (CalCtx.state != CalibrationState::Continuous) {
+		ctx.state = CalibrationState::None;
+		calibration.Clear();
+	}
+	else {
+		size_t drop_samples = CalCtx.SampleCount() / 10;
+		for (int i = 0; i < drop_samples; i++) {
+			calibration.ShiftSample();
 		}
 	}
 }
