@@ -721,6 +721,7 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 	}
 
 	double newVariance = 0;
+	bool shouldRapidCorrect = true;
 	if (!newCalibrationValid) {
 		calibration = ComputeCalibration(ignoreOutliers);
 
@@ -729,6 +730,7 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 
 		if (newVariance < AxisVarianceThreshold && newVariance < m_axisVariance) {
 			newCalibrationValid = false;
+			shouldRapidCorrect = false;
 		} else {
 			newCalibrationValid = ValidateCalibration(calibration, &newError, &m_posOffset);
 			Metrics::posOffset_rawComputed.Push(m_posOffset * 1000);
@@ -738,6 +740,7 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 			if (priorCalibrationError < newError * threshold) {
 				// If we have a more noisy calibration than before, avoid updating.
 				newCalibrationValid = false;
+				shouldRapidCorrect = false;
 			}
 		}
 
@@ -758,7 +761,7 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 		
 	
 	// Now, can we use the relative pose to perform a rapid correction?
-    if (!newCalibrationValid) {
+	if (!newCalibrationValid && shouldRapidCorrect) {
 		
 		double existingPoseErrorUsingRelPosition = RetargetingErrorRMS(m_refToTargetPose.translation(), m_estimatedTransformation);
 		Metrics::error_currentCalRelPose.Push(existingPoseErrorUsingRelPosition * 1000);
