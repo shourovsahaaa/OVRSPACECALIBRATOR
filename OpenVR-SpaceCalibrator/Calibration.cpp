@@ -596,11 +596,12 @@ void CalibrationTick(double time)
 		CalCtx.messages.clear();
 		calibration.enableStaticRecalibration = CalCtx.enableStaticRecalibration;
 		calibration.lockRelativePosition = CalCtx.lockRelativePosition;
-		calibration.ComputeIncremental(lerp, CalCtx.continuousCalibrationThreshold);
+		calibration.ComputeIncremental(lerp, CalCtx.continuousCalibrationThreshold, CalCtx.ignoreOutliers);
 	}
 	else {
 		calibration.enableStaticRecalibration = false;
 		calibration.ComputeOneshot();
+		calibration.ComputeOneshot(CalCtx.ignoreOutliers);
 	}
 
 	if (calibration.isValid()) {

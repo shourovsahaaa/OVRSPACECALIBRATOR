@@ -456,6 +456,7 @@ void CCal_BasicInfo() {
 	ImGui::Checkbox("Lock relative transform", &CalCtx.lockRelativePosition);
 	ImGui::SameLine();
 	ImGui::Checkbox("Require triggers", &CalCtx.requireTriggerPressToApply);
+	ImGui::Checkbox("Ignore outliers", &CalCtx.ignoreOutliers);
 
 	// Status field...
 

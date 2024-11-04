@@ -199,13 +199,13 @@ std::vector<bool> CalibrationCalc::DetectOutliers() const {
 	return valids;
 }
 
-Eigen::Vector3d CalibrationCalc::CalibrateRotation() const {
+Eigen::Vector3d CalibrationCalc::CalibrateRotation(const bool ignoreOutliers) const {
 	std::vector<DSample> deltas;
 	std::vector<bool> valids = DetectOutliers();
 
 	for (size_t i = 0; i < m_samples.size(); i++) {
 		for (size_t j = 0; j < i; j++) {
-			if (!valids[i] || !valids[j]) {
+			if ( ignoreOutliers && (!valids[i] || !valids[j])) {
 				continue;
 			}
 			auto delta = DeltaRotationSamples(m_samples[i], m_samples[j]);
@@ -335,8 +335,8 @@ namespace {
 	}
 }
 
-Eigen::AffineCompact3d CalibrationCalc::ComputeCalibration() const {
-	Eigen::Vector3d rotation = CalibrateRotation();
+Eigen::AffineCompact3d CalibrationCalc::ComputeCalibration(const bool ignoreOutliers) const {
+	Eigen::Vector3d rotation = CalibrateRotation(ignoreOutliers);
 	Eigen::Matrix3d rotationMat = quaternionRotateMatrix(VRRotationQuat(rotation));
 	Eigen::Vector3d translation = CalibrateTranslation(rotationMat);
 	
@@ -636,8 +636,8 @@ bool CalibrationCalc::CalibrateByRelPose(Eigen::AffineCompact3d &out) const {
 
 
 
-bool CalibrationCalc::ComputeOneshot() {
-	auto calibration = ComputeCalibration();
+bool CalibrationCalc::ComputeOneshot(const bool ignoreOutliers) {
+	auto calibration = ComputeCalibration(ignoreOutliers);
 
 	bool valid = ValidateCalibration(calibration);
 
@@ -665,9 +665,7 @@ void CalibrationCalc::ComputeInstantOffset() {
 	Metrics::posOffset_lastSample.Push(hmdSpace * 1000);
 }
 
-bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold) {
-
-
+bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const bool ignoreOutliers) {
 	Metrics::RecordTimestamp();
 
 	if (lockRelativePosition) {
@@ -721,8 +719,8 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold) {
 	}
 
 	double newVariance = 0;
-    if (!newCalibrationValid) {
-        calibration = ComputeCalibration();
+	if (!newCalibrationValid) {
+		calibration = ComputeCalibration(ignoreOutliers);
 
         newVariance = ComputeAxisVariance(calibration)(1);
 		Metrics::axisIndependence.Push(newVariance);

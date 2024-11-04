@@ -133,6 +133,7 @@ static void ParseProfile(CalibrationContext &ctx, std::istream &stream)
 	}
 	ctx.quashTargetInContinuous = obj["quash_target_in_continuous"].evaluate_as_boolean();
 	ctx.requireTriggerPressToApply = obj["require_trigger_press_to_apply"].evaluate_as_boolean();
+	ctx.ignoreOutliers = obj["ignore_outliers"].evaluate_as_boolean();
 	ctx.continuousCalibrationOffset(0) = obj["continuous_calibration_target_offset_x"].get<double>();
 	ctx.continuousCalibrationOffset(1) = obj["continuous_calibration_target_offset_y"].get<double>();
 	ctx.continuousCalibrationOffset(2) = obj["continuous_calibration_target_offset_z"].get<double>();
@@ -248,6 +249,7 @@ static void WriteProfile(CalibrationContext &ctx, std::ostream &out)
 	profile["autostart_continuous_calibration"].set<bool>(isInContinuousCalibrationMode);
 	profile["quash_target_in_continuous"].set<bool>(ctx.quashTargetInContinuous);
 	profile["require_trigger_press_to_apply"].set<bool>(ctx.requireTriggerPressToApply);
+	profile["ignore_outliers"].set<bool>(ctx.ignoreOutliers);
 	profile["continuous_calibration_target_offset_x"].set<double>(ctx.continuousCalibrationOffset(0));
 	profile["continuous_calibration_target_offset_y"].set<double>(ctx.continuousCalibrationOffset(1));
 	profile["continuous_calibration_target_offset_z"].set<double>(ctx.continuousCalibrationOffset(2));

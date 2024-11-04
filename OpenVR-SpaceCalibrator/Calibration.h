@@ -47,6 +47,7 @@ struct CalibrationContext
 	bool clearOnLog = false;
 	bool quashTargetInContinuous = false;
 	double timeLastTick = 0, timeLastScan = 0, timeLastAssign = 0;
+	bool ignoreOutliers = false;
 	double wantedUpdateInterval = 1.0;
 	float jitterThreshold = 3.0f;
 
