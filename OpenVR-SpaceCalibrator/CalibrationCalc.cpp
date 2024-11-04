@@ -505,7 +505,7 @@ Eigen::Vector4d CalibrationCalc::ComputeAxisVariance(
 	return solver.eigenvalues();
 }
 
-bool CalibrationCalc::ValidateCalibration(const Eigen::AffineCompact3d &calibration, double *error, Eigen::Vector3d *posOffsetV) {
+[[nodiscard]] bool CalibrationCalc::ValidateCalibration(const Eigen::AffineCompact3d &calibration, double *error, Eigen::Vector3d *posOffsetV) {
 	bool ok = true;
 
 	const auto posOffset = ComputeRefToTargetOffset(calibration);
