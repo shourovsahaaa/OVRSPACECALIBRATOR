@@ -7,7 +7,7 @@
 #include <vector>
 #include <deque>
 
-#include "../Protocol.h"
+#include "Protocol.h"
 
 enum class CalibrationState
 {

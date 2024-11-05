@@ -37,6 +37,7 @@ add_library(implot STATIC
 	${CMAKE_SOURCE_DIR}/lib/implot/implot_items.cpp)
 target_include_directories(implot PUBLIC ${CMAKE_SOURCE_DIR}/lib/implot)
 target_compile_definitions(implot PRIVATE IMGUI_DEFINE_MATH_OPERATORS)
+target_link_libraries(implot PRIVATE imgui)
 
 # gl3w
 message("Adding gl3w...")
