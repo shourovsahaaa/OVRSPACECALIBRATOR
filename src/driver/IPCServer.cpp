@@ -75,7 +75,7 @@ void IPCServer::ClosePipeInstance(PipeInstance *pipeInst)
 void IPCServer::RunThread(IPCServer *_this)
 {
 	_this->running = true;
-	LPTSTR pipeName = TEXT(OPENVR_SPACECALIBRATOR_PIPE_NAME);
+	LPCTSTR pipeName = TEXT(OPENVR_SPACECALIBRATOR_PIPE_NAME);
 
 	HANDLE connectEvent = _this->connectEvent = CreateEvent(0, TRUE, TRUE, 0);
 	if (!connectEvent)

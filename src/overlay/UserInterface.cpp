@@ -4,7 +4,7 @@
 #include "Configuration.h"
 #include "VRState.h"
 #include "CalibrationMetrics.h"
-#include "../Version.h"
+#include "Version.h"
 
 #include <thread>
 #include <string>

@@ -3,7 +3,7 @@
 #define EIGEN_MPL2_ONLY
 
 #include "IPCServer.h"
-#include "../Protocol.h"
+#include "Protocol.h"
 #include "IsometryTransform.h"
 
 #include <Eigen/Dense>

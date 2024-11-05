@@ -6,12 +6,12 @@
 #include "CalibrationCalc.h"
 #include "CalibrationMetrics.h"
 #include "UserInterface.h"
-// ImPlotPoint (*ImPlotGetter)(void* user_data, int idx);
+// ImPlotPoint (*ImPlotGetter)(int idx, void* user_data);
 namespace {
 	double refTime;
 
 	template<typename F>
-	ImPlotPoint VPIndexer(void* ptr, int idx) {
+	ImPlotPoint VPIndexer(int idx, void* ptr) {
 		auto point = (*reinterpret_cast<const F*>(ptr))(idx);
 		point.x -= refTime;
 		return point;
@@ -104,21 +104,21 @@ namespace {
 	void AddApplyTicks() {
 		if (calAppliedTimeBuffer.empty()) {
 			double x = -INFINITY;
-			ImPlot::PlotVLines("##CalibrationAppliedTime", &x, 1);
+			ImPlot::PlotInfLines("##CalibrationAppliedTime", &x, 1);
 		} else {
-			ImPlot::PlotVLines("##CalibrationAppliedTime", &calAppliedTimeBuffer[0], (int)calAppliedTimeBuffer.size());
+			ImPlot::PlotInfLines("##CalibrationAppliedTime", &calAppliedTimeBuffer[0], (int)calAppliedTimeBuffer.size());
 		}
 
 		if (calByRelPoseTimeBuffer.empty()) {
 			double x = -INFINITY;
-			ImPlot::PlotVLines("##CalibrationAppliedTimeByRelPose", &x, 1);
+			ImPlot::PlotInfLines("##CalibrationAppliedTimeByRelPose", &x, 1);
 		}
 		else {
-			ImPlot::PlotVLines("##CalibrationAppliedTimeByRelPose", &calByRelPoseTimeBuffer[0], (int)calByRelPoseTimeBuffer.size());
+			ImPlot::PlotInfLines("##CalibrationAppliedTimeByRelPose", &calByRelPoseTimeBuffer[0], (int)calByRelPoseTimeBuffer.size());
 		}
 
 		ImPlot::SetNextLineStyle(ImVec4(0.5, 0.5, 1, 1));
-		ImPlot::PlotVLines("##TagLine", &lastMouseX, 1);
+		ImPlot::PlotInfLines("##TagLine", &lastMouseX, 1);
 
 		if (ImPlot::IsPlotHovered()) {
 			auto mousePos = ImPlot::GetPlotMousePos();
@@ -279,7 +279,7 @@ namespace {
 			PlotShadedG("##VarianceLow",
 				[&](int index) {
 					auto p = Metrics::axisIndependence[index];
-					p.second = min(p.second, CalibrationCalc::AxisVarianceThreshold);
+					p.second = std::min(p.second, CalibrationCalc::AxisVarianceThreshold);
 					return ImPlotPoint(p.first, p.second);
 				},
 				[&](int index) {
@@ -294,7 +294,7 @@ namespace {
 			PlotShadedG("##VarianceHigh",
 				[&](int index) {
 					auto p = Metrics::axisIndependence[index];
-					p.second = max(p.second, CalibrationCalc::AxisVarianceThreshold);
+					p.second = std::max(p.second, CalibrationCalc::AxisVarianceThreshold);
 					return ImPlotPoint(p.first, p.second);
 				},
 				[&](int index) {

@@ -1,7 +1,7 @@
 #include "CalibrationCalc.h"
 #include "Calibration.h"
 #include "CalibrationMetrics.h"
-#include "..\Protocol.h"
+#include "Protocol.h"
 
 inline vr::HmdQuaternion_t operator*(const vr::HmdQuaternion_t& lhs, const vr::HmdQuaternion_t& rhs) {
 	return {

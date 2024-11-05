@@ -6,8 +6,8 @@
 
 #include <imgui/imgui.h>
 #include <imgui/imgui_internal.h>
-#include <imgui/imgui_impl_glfw.h>
-#include <imgui/imgui_impl_opengl3.h>
+#include <imgui/backends/imgui_impl_glfw.h>
+#include <imgui/backends/imgui_impl_opengl3.h>
 #include <implot/implot.h>
 #include <GL/gl3w.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
@@ -18,6 +18,7 @@
 #include <chrono>
 #include <thread>
 #include <dwmapi.h>
+#include <algorithm>
 
 #include <stb_image.h>
 
@@ -290,8 +291,8 @@ void RunLoop()
 
 				if (textInfo != nullptr) {
 					textBuf[0] = 0;
-					int len = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)textInfo->TextW.Data, textInfo->TextW.Size, textBuf, sizeof(textBuf), nullptr, nullptr);
-					textBuf[min(len, sizeof(textBuf) - 1)] = 0;
+					int len = WideCharToMultiByte(CP_ACP, 0, (LPCWCH)textInfo->TextA.Data, textInfo->TextA.Size, textBuf, sizeof(textBuf), nullptr, nullptr);
+					textBuf[std::min(static_cast<size_t>(len), sizeof(textBuf) - 1)] = 0;
 
 					uint32_t unFlags = 0; // EKeyboardFlags 
 
@@ -329,10 +330,10 @@ void RunLoop()
 					int id = ImGui::GetActiveID();
 					auto textInfo = ImGui::GetInputTextState(id);
 					int bufSize = MultiByteToWideChar(CP_ACP, 0, textBuf, -1, nullptr, 0);
-					textInfo->TextW.resize(bufSize);
-					MultiByteToWideChar(CP_ACP, 0, textBuf, -1, (LPWSTR)textInfo->TextW.Data, bufSize);
-					textInfo->CurLenW = bufSize;
-					textInfo->CurLenA = WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)textInfo->TextW.Data, textInfo->TextW.Size, nullptr, 0, nullptr, nullptr);
+					textInfo->TextA.resize(bufSize);
+					MultiByteToWideChar(CP_ACP, 0, textBuf, -1, (LPWSTR)textInfo->TextA.Data, bufSize);
+					textInfo->CurLenA = bufSize;
+					textInfo->CurLenA = WideCharToMultiByte(CP_UTF8, 0, (LPCWCH)textInfo->TextA.Data, textInfo->TextA.Size, nullptr, 0, nullptr, nullptr);
 					
 					keyboardJustClosed = true;
 					break;
@@ -397,7 +398,7 @@ void RunLoop()
 		}
 
 		const double dashboardInterval = 1.0 / 90.0; // fps
-		double waitEventsTimeout = max(CalCtx.wantedUpdateInterval, dashboardInterval);
+		double waitEventsTimeout = std::max(CalCtx.wantedUpdateInterval, dashboardInterval);
 
 		if (dashboardVisible && waitEventsTimeout > dashboardInterval)
 			waitEventsTimeout = dashboardInterval;

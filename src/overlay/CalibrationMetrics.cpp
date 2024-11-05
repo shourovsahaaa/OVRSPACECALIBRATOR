@@ -5,7 +5,7 @@
 #include <vector>
 
 namespace Metrics {
-	double TimeSpan = 30, CurrentTime;
+	double TimeSpan = 30, CurrentTime = 0;
 
 	TimeSeries<Eigen::Vector3d> posOffset_rawComputed; // , rotOffset_rawComputed;
 	TimeSeries<Eigen::Vector3d> posOffset_currentCal; // , rotOffset_currentCal;
@@ -19,6 +19,45 @@ namespace Metrics {
 
 	// true - full calibration, false - static calibration
 	TimeSeries<bool> calibrationApplied;
+
+	// https://stackoverflow.com/a/17827724
+	bool IsBrowsePath(const std::wstring& path)
+	{
+		return (path == L"." || path == L"..");
+	}
+
+	uint64_t CalculateDirSize(const std::wstring& path, uint64_t size = 0)
+	{
+		WIN32_FIND_DATA data;
+		HANDLE sh = NULL;
+		sh = FindFirstFile((path + L"\\*").c_str(), &data);
+
+		if (sh == INVALID_HANDLE_VALUE)
+		{
+			// We should probably return an error, but we don't for the sake of minimising memory allocations
+			return size;
+		}
+
+		do
+		{
+			// skip current and parent
+			if (!IsBrowsePath(data.cFileName))
+			{
+				// if found object is ...
+				if ((data.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+					// directory, then search it recursievly
+					size = CalculateDirSize(path + L"\\" + data.cFileName, size);
+				else
+					// otherwise get object size and add it to directory size
+					size += (uint64_t)(data.nFileSizeHigh * (MAXDWORD)+data.nFileSizeLow);
+			}
+
+		} while (FindNextFile(sh, &data)); // do
+
+		FindClose(sh);
+
+		return size;
+	}
 
 	double timestamp() {
 		static long long ts_start = ~0LL;
@@ -122,6 +161,7 @@ namespace Metrics {
 		}
 	}
 
+	// %userprofile%\LocalLow\OpenVR-SpaceCalibrator\Logs
 	static bool OpenLogFile() {
 		PWSTR RootPath = nullptr;
 		if (S_OK != SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, nullptr, &RootPath)) {
@@ -144,7 +184,7 @@ namespace Metrics {
 
 		ClearOldLogs(path);
 
-		SYSTEMTIME now;
+		SYSTEMTIME now{};
 		GetSystemTime(&now);
 
 		size_t dateBufLen = GetDateFormatW(LOCALE_USER_DEFAULT, 0, &now, L"yyyy-MM-dd", nullptr, 0);

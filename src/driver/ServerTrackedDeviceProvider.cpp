@@ -121,7 +121,7 @@ ServerTrackedDeviceProvider::DeltaSize ServerTrackedDeviceProvider::GetTransform
 	else rot_level = DeltaSize::TINY;
 
 	if (trans_level == DeltaSize::TINY && rot_level == DeltaSize::TINY) return DeltaSize::TINY;
-	else return max(prior_delta, max(trans_level, rot_level));
+	else return std::max(prior_delta, std::max(trans_level, rot_level));
 }
 
 double ServerTrackedDeviceProvider::GetTransformRate(DeltaSize delta) const {
