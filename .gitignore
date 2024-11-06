@@ -4,10 +4,6 @@ ipch
 *.opendb
 *.aps
 *.user
-/OpenVR-SpaceCalibrator/x64/
-/OpenVR-SpaceCalibratorDriver/x64/
-/x64/
-/lib/boost*
-/install/OpenVR-SpaceCalibrator.exe
-lib/Release/
+.code
+/install/*.exe
 [bB]in
