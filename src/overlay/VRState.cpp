@@ -6,7 +6,7 @@ VRState VRState::Load()
 	VRState state;
 	auto& trackingSystems = state.trackingSystems;
 
-	char buffer[vr::k_unMaxPropertyStringSize];
+	char buffer[vr::k_unMaxPropertyStringSize] = {};
 
 	for (uint32_t id = 0; id < vr::k_unMaxTrackedDeviceCount; ++id)
 	{
@@ -91,17 +91,32 @@ VRState VRState::Load()
 }
 
 int VRState::FindDevice(const std::string& trackingSystem, const std::string& model, const std::string& serial) const {
+	// Find the device with the matching tracking system, model and serial
 	for (int i = 0; i < devices.size(); i++) {
 		const auto& device = devices[i];
 		
-		if (device.trackingSystem == trackingSystem && device.model == model && device.serial == serial) return device.id;
-	}
+		uint8_t matches = 0;
 
-	// allow fallback excluding serial for HMD specifically
-	for (int i = 0; i < devices.size(); i++) {
-		const auto& device = devices[i];
+		if (device.model == model) {
+			matches++;
+		}
+		if (device.serial == serial) {
+			matches++;
+		}
 
-		if (device.trackingSystem == trackingSystem && device.model == model && device.deviceClass == vr::TrackedDeviceClass::TrackedDeviceClass_HMD) return device.id;
+		// Only return if:
+		//   - The tracking system is identical
+		//   - If the device is not a HMD, the model and serial number ALSO are identical.
+		//   - If the device is the HMD, the model OR serial number are also identical.
+		// 
+		// This handles an edge case of some device drivers being poorly developed or misbehaving, returning bad data to SteamVR and in turn, Space Calibrator
+		// e.g.   SteamLink sometimes reports the Quest Pro as either "Oculus Quest Pro" or "Oculus Quest2" as it's model string
+		//        It still reports the serial number correctly however as "VRLINKHMDQUESTPRO"!
+		if (device.trackingSystem == trackingSystem &&
+			((matches == 2 && device.deviceClass != vr::TrackedDeviceClass::TrackedDeviceClass_HMD) ||
+			(matches == 1 && device.deviceClass == vr::TrackedDeviceClass::TrackedDeviceClass_HMD))) {
+			return device.id;
+		}
 	}
 
 	return -1;
