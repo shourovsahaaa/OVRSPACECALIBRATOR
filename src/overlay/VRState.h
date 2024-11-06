@@ -7,11 +7,11 @@
 struct VRDevice
 {
 	int id = -1;
-	vr::TrackedDeviceClass deviceClass;
+	vr::TrackedDeviceClass deviceClass = vr::TrackedDeviceClass::TrackedDeviceClass_Invalid;
 	std::string model = "";
 	std::string serial = "";
 	std::string trackingSystem = "";
-	vr::ETrackedControllerRole controllerRole = vr::TrackedControllerRole_Invalid;
+	vr::ETrackedControllerRole controllerRole = vr::ETrackedControllerRole::TrackedControllerRole_Invalid;
 };
 
 struct VRState
