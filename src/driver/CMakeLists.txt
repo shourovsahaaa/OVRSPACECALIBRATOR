@@ -14,28 +14,28 @@ project(SpaceCalibratorDriver)
 message("SpaceCalibrator - Driver")
 
 function(GroupSourcesByFolder target)
-  set(SOURCE_GROUP_DELIMITER "/")
-  set(last_dir "")
-  set(files "")
+    set(SOURCE_GROUP_DELIMITER "/")
+    set(last_dir "")
+    set(files "")
+    
+    get_target_property(sources ${target} SOURCES)
+    
+    foreach(file ${sources})
+        file(RELATIVE_PATH relative_file "${PROJECT_SOURCE_DIR}" ${file})
+        get_filename_component(dir "${relative_file}" PATH)
+        if(NOT "${dir}" STREQUAL "${last_dir}")
+            if(files)
+                source_group("${last_dir}" FILES ${files})
+            endif()
+            set(files "")
+        endif()
+        set(files ${files} ${file})
+        set(last_dir "${dir}")
+    endforeach()
 
-  get_target_property(sources ${target} SOURCES)
-
-  foreach(file ${sources})
-    file(RELATIVE_PATH relative_file "${PROJECT_SOURCE_DIR}" ${file})
-    get_filename_component(dir "${relative_file}" PATH)
-    if(NOT "${dir}" STREQUAL "${last_dir}")
-      if(files)
+    if(files)
         source_group("${last_dir}" FILES ${files})
-      endif()
-      set(files "")
     endif()
-    set(files ${files} ${file})
-    set(last_dir "${dir}")
-  endforeach()
-
-  if(files)
-    source_group("${last_dir}" FILES ${files})
-  endif()
 endfunction()
 
 
@@ -90,7 +90,7 @@ find_library(OPENVR_LIBRARIES
 
 # Add source files
 file(GLOB_RECURSE SOURCES_API ${CMAKE_SOURCE_DIR}/src/driver "*.c" "*.h" "*.hpp" "*.cpp")
-file(GLOB_RECURSE SOURCES_HEADERS ${CMAKE_SOURCE_DIR}/src/driver "*.h" "*.hpp")
+file(GLOB_RECURSE SOURCES_HEADERS ${CMAKE_SOURCE_DIR}/src/common "*.h" "*.hpp")
 
 foreach(SOURCE IN ITEMS ${SOURCES_API})
     get_filename_component(SOURCE_PATH "${SOURCE}" PATH)
