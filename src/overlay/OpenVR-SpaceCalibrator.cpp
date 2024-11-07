@@ -94,7 +94,7 @@ void CreateGLFWWindow()
 	fboTextureWidth = 1200;
 	fboTextureHeight = 800;
 
-	glfwWindow = glfwCreateWindow(fboTextureWidth, fboTextureHeight, "OpenVR-SpaceCalibrator", nullptr, nullptr);
+	glfwWindow = glfwCreateWindow(fboTextureWidth, fboTextureHeight, "Space Calibrator", nullptr, nullptr);
 	if (!glfwWindow)
 		throw std::runtime_error("Failed to create window");
 
