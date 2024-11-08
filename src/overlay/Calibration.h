@@ -58,6 +58,7 @@ struct CalibrationContext
 	float xprev, yprev, zprev;
 
 	float continuousCalibrationThreshold;
+	float maxRelativeErrorThreshold = 0.005f;
 	Eigen::Vector3d continuousCalibrationOffset;
 
 	protocol::AlignmentSpeedParams alignmentSpeedParams;
@@ -97,6 +98,7 @@ struct CalibrationContext
 		alignmentSpeedParams.align_speed_large = 2.0f;
 
 		continuousCalibrationThreshold = 1.5f;
+		maxRelativeErrorThreshold = 0.005f;
 		jitterThreshold = 3.0f;
 
 		continuousCalibrationOffset = Eigen::Vector3d::Zero();

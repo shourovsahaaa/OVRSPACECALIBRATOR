@@ -99,7 +99,7 @@ public:
 	double TargetJitter() const;
 
 	bool ComputeOneshot(const bool ignoreOutliers);
-	bool ComputeIncremental(bool &lerp, double threshold, const bool ignoreOutliers);
+	bool ComputeIncremental(bool &lerp, double threshold, double relPoseMaxError, const bool ignoreOutliers);
 
 	size_t SampleCount() const {
 		return m_samples.size();

@@ -665,7 +665,7 @@ void CalibrationCalc::ComputeInstantOffset() {
 	Metrics::posOffset_lastSample.Push(hmdSpace * 1000);
 }
 
-bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const bool ignoreOutliers) {
+bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, double relPoseMaxError, const bool ignoreOutliers) {
 	Metrics::RecordTimestamp();
 
 	if (lockRelativePosition) {
@@ -689,10 +689,6 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 	if (m_isValid && ValidateCalibration(m_estimatedTransformation, &priorCalibrationError, &priorPosOffset)) {
 		Metrics::posOffset_currentCal.Push(priorPosOffset * 1000);
 		Metrics::error_currentCal.Push(priorCalibrationError * 1000);
-
-		if (priorCalibrationError < 0.005) {
-			return false;
-		}
 	}
 
 	double newError = INFINITY;
@@ -714,6 +710,10 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, const boo
 				newError = relPoseError;
 				calibration = byRelPose;
 				if (relPoseError * threshold >= priorCalibrationError) {
+					return false;
+				}
+
+				if (relPoseError > relPoseMaxError) {
 					return false;
 				}
 			}

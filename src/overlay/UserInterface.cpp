@@ -279,6 +279,16 @@ void CCal_DrawSettings() {
 			}
 			ImGui::PopID();
 
+			// Recalibration threshold
+			ImGui::Text("Max relative error threshold");
+			ImGui::SameLine();
+			ImGui::PushID("max_relative_error_threshold");
+			ImGui::SliderFloat("##max_relative_error_threshold_slider", &CalCtx.maxRelativeErrorThreshold, 0.01f, 1.0f, "%1.1f", 0);
+			if (ImGui::IsItemHovered(0)) {
+				ImGui::SetTooltip("Controls the maximum acceptable relative error. If the error from the relative .");
+			}
+			ImGui::PopID();
+
 			// Jitter threshold
 			ImGui::Text("Jitter threshold");
 			ImGui::SameLine();
