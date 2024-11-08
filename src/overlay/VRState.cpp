@@ -114,7 +114,7 @@ int VRState::FindDevice(const std::string& trackingSystem, const std::string& mo
 		//        It still reports the serial number correctly however as "VRLINKHMDQUESTPRO"!
 		if (device.trackingSystem == trackingSystem &&
 			((matches == 2 && device.deviceClass != vr::TrackedDeviceClass::TrackedDeviceClass_HMD) ||
-			(matches == 1 && device.deviceClass == vr::TrackedDeviceClass::TrackedDeviceClass_HMD))) {
+			(matches >= 1 && device.deviceClass == vr::TrackedDeviceClass::TrackedDeviceClass_HMD))) {
 			return device.id;
 		}
 	}
