@@ -263,7 +263,9 @@ void RunLoop()
 		if (overlayMainHandle && vr::VROverlay())
 		{
 			auto &io = ImGui::GetIO();
-			dashboardVisible = vr::VROverlay()->IsActiveDashboardOverlay(overlayMainHandle);
+			dashboardVisible = vr::VROverlay()->IsActiveDashboardOverlay(overlayMainHandle)
+				// @HACK: because this returns false now???
+				|| vr::VROverlay()->IsDashboardVisible();
 
 			static bool keyboardOpen = false, keyboardJustClosed = false;
 
