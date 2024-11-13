@@ -275,7 +275,7 @@ void CCal_DrawSettings() {
 			ImGui::SliderFloat("##recalibration_threshold_slider", &CalCtx.continuousCalibrationThreshold, 1.01f, 10.0f, "%1.1f", 0);
 			if (ImGui::IsItemHovered(0)) {
 				ImGui::SetTooltip("Controls how good the calibration must be before realigning the trackers.\n"
-					"Higher values cause calibration to happen less often, and may be useful for system with lots of tracking drift.");
+					"Higher values cause calibration to happen less often, and may be useful for systems with lots of tracking drift.");
 			}
 			ImGui::PopID();
 
@@ -285,7 +285,7 @@ void CCal_DrawSettings() {
 			ImGui::PushID("max_relative_error_threshold");
 			ImGui::SliderFloat("##max_relative_error_threshold_slider", &CalCtx.maxRelativeErrorThreshold, 0.01f, 1.0f, "%1.1f", 0);
 			if (ImGui::IsItemHovered(0)) {
-				ImGui::SetTooltip("Controls the maximum acceptable relative error. If the error from the relative .");
+				ImGui::SetTooltip("Controls the maximum acceptable relative error. If the error from the relative calibration is too poor, the calibration will be discarded.");
 			}
 			ImGui::PopID();
 
