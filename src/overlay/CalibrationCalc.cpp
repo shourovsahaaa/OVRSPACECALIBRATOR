@@ -705,10 +705,6 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, double re
 			Metrics::error_byRelPose.Push(relPoseError * 1000);
 
 			if (relPoseError < 0.010 || m_relativePosCalibrated && relPoseError < 0.025) {
-				newCalibrationValid = true;
-				usingRelPose = true;
-				newError = relPoseError;
-				calibration = byRelPose;
 				if (relPoseError * threshold >= priorCalibrationError) {
 					return false;
 				}
@@ -716,6 +712,11 @@ bool CalibrationCalc::ComputeIncremental(bool &lerp, double threshold, double re
 				if (relPoseError > relPoseMaxError) {
 					return false;
 				}
+
+				newCalibrationValid = true;
+				usingRelPose = true;
+				newError = relPoseError;
+				calibration = byRelPose;
 			}
 		}
 	}
