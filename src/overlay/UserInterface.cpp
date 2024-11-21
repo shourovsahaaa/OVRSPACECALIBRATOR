@@ -74,7 +74,7 @@ void BuildMainWindow(bool runningInOverlay_)
 
 void ShowVersionLine() {
 	ImGui::SetNextWindowPos(ImVec2(10.0f, ImGui::GetWindowHeight() - ImGui::GetFrameHeightWithSpacing()));
-	if (!ImGui::BeginChild("bottom line", ImVec2(ImGui::GetWindowWidth() - 20.0f, ImGui::GetFrameHeightWithSpacing() * 2), false)) {
+	if (!ImGui::BeginChild("bottom line", ImVec2(ImGui::GetWindowWidth() - 20.0f, ImGui::GetFrameHeightWithSpacing() * 2), ImGuiChildFlags_None)) {
 		ImGui::EndChild();
 		return;
 	}
@@ -105,8 +105,9 @@ void BuildContinuousCalDisplay() {
 	contentRegion.x = ImGui::GetWindowContentRegionWidth();
 	contentRegion.y = ImGui::GetWindowHeight() - ImGui::GetFrameHeightWithSpacing() * 2.1f;
 
-	if (!ImGui::BeginChild("CCalDisplayFrame", contentRegion, false)) {
+	if (!ImGui::BeginChild("CCalDisplayFrame", contentRegion, ImGuiChildFlags_None)) {
 		ImGui::EndChild();
+		ImGui::End();
 		return;
 	}
 
@@ -857,13 +858,13 @@ void BuildDeviceSelections(const VRState &state)
 	ImGuiStyle &style = ImGui::GetStyle();
 	ImVec2 paneSize(ImGui::GetWindowContentRegionWidth() / 2 - style.FramePadding.x, ImGui::GetTextLineHeightWithSpacing() * 5 + style.ItemSpacing.y * 4);
 
-	ImGui::BeginChild("left device pane", paneSize, true);
+	ImGui::BeginChild("left device pane", paneSize, ImGuiChildFlags_Borders);
 	BuildDeviceSelection(state, CalCtx.referenceID, CalCtx.referenceTrackingSystem, CalCtx.referenceStandby);
 	ImGui::EndChild();
 
 	ImGui::SameLine();
 
-	ImGui::BeginChild("right device pane", paneSize, true);
+	ImGui::BeginChild("right device pane", paneSize, ImGuiChildFlags_Borders);
 	BuildDeviceSelection(state, CalCtx.targetID, CalCtx.targetTrackingSystem, CalCtx.targetStandby);
 	ImGui::EndChild();
 

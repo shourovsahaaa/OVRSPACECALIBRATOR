@@ -263,9 +263,7 @@ void RunLoop()
 		if (overlayMainHandle && vr::VROverlay())
 		{
 			auto &io = ImGui::GetIO();
-			dashboardVisible = vr::VROverlay()->IsActiveDashboardOverlay(overlayMainHandle)
-				// @HACK: because this returns false now???
-				|| vr::VROverlay()->IsDashboardVisible();
+			dashboardVisible = vr::VROverlay()->IsActiveDashboardOverlay(overlayMainHandle);
 
 			static bool keyboardOpen = false, keyboardJustClosed = false;
 
@@ -349,15 +347,19 @@ void RunLoop()
 		if (windowVisible || dashboardVisible)
 		{
 			auto &io = ImGui::GetIO();
-			io.DisplaySize = ImVec2((float) fboTextureWidth, (float) fboTextureHeight);
+			
+			// These change state now, so we must execute these before doing our own modifications to the io state for VR
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui_ImplGlfw_NewFrame();
+
+			io.DisplaySize = ImVec2((float)fboTextureWidth, (float)fboTextureHeight);
 			io.DisplayFramebufferScale = ImVec2(1.0f, 1.0f);
 
 			io.ConfigFlags = io.ConfigFlags & ~ImGuiConfigFlags_NoMouseCursorChange;
 			if (dashboardVisible) {
 				io.ConfigFlags = io.ConfigFlags | ImGuiConfigFlags_NoMouseCursorChange;
 			}
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui_ImplGlfw_NewFrame();
+
 			ImGui::NewFrame();
 
 			BuildMainWindow(dashboardVisible);
@@ -382,15 +384,15 @@ void RunLoop()
 
 			if (dashboardVisible)
 			{
-				vr::Texture_t vrTex = { 0 };
-				vrTex.eType = vr::TextureType_OpenGL;
-				vrTex.eColorSpace = vr::ColorSpace_Auto;
-
-				vrTex.handle = (void *)
+				vr::Texture_t vrTex = {
+					.handle = (void*)
 #if defined _WIN64 || defined _LP64
 				(uint64_t)
 #endif
-					fboTextureHandle;
+						fboTextureHandle,
+					.eType = vr::TextureType_OpenGL,
+					.eColorSpace = vr::ColorSpace_Auto,
+				};
 
 				vr::HmdVector2_t mouseScale = { (float) fboTextureWidth, (float) fboTextureHeight };
 
