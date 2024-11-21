@@ -3,13 +3,13 @@
 	"applications": [{
 		"app_key": "pushrax.SpaceCalibrator",
 		"launch_type": "binary",
-		"binary_path_windows": "OpenVR-SpaceCalibrator.exe",
+		"binary_path_windows": "SpaceCalibrator.exe",
 		"is_dashboard_overlay": true,
 
 		"strings": {
 			"en_us": {
 				"name": "Space Calibrator",
-				"description": "OpenVR Space Calibrator Overlay"
+				"description": "Space Calibrator Overlay"
 			}
 		}
 	}]
