@@ -110,7 +110,7 @@ void CreateGLFWWindow()
 	// Load icon and set it in the window
 	GLFWimage images[1] = {};
 	std::string iconPath = cwd;
-	iconPath += "\\icon.png";
+	iconPath += "\\taskbar_icon.png";
 	images[0].pixels = stbi_load(iconPath.c_str(), &images[0].width, &images[0].height, 0, 4);
 	glfwSetWindowIcon(glfwWindow, 1, images);
 	stbi_image_free(images[0].pixels);
@@ -164,7 +164,7 @@ void TryCreateVROverlay()
 
 	if (error == vr::VROverlayError_KeyInUse)
 	{
-		throw std::runtime_error("Another instance of OpenVR Space Calibrator is already running");
+		throw std::runtime_error("Another instance of Space Calibrator is already running");
 	}
 	else if (error != vr::VROverlayError_None)
 	{

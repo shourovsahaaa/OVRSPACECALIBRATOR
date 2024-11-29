@@ -52,7 +52,7 @@ void IPCClient::Connect()
 	if (response.type != protocol::ResponseHandshake || response.protocol.version != protocol::Version)
 	{
 		throw std::runtime_error(
-			"Incorrect driver version installed, try reinstalling OpenVR-SpaceCalibrator. (Client: " +
+			"Incorrect driver version installed, try reinstalling Space Calibrator. (Client: " +
 			std::to_string(protocol::Version) +
 			", Driver: " +
 			std::to_string(response.protocol.version) +

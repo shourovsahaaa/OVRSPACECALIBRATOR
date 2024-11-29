@@ -161,7 +161,7 @@ namespace Metrics {
 		}
 	}
 
-	// %userprofile%\LocalLow\OpenVR-SpaceCalibrator\Logs
+	// %userprofile%\LocalLow\SpaceCalibrator\Logs
 	static bool OpenLogFile() {
 		PWSTR RootPath = nullptr;
 		if (S_OK != SHGetKnownFolderPath(FOLDERID_LocalAppDataLow, 0, nullptr, &RootPath)) {
@@ -172,7 +172,7 @@ namespace Metrics {
 		std::wstring path(RootPath);
 		CoTaskMemFree(RootPath);
 		
-		path += LR"(\OpenVR-SpaceCalibrator)";
+		path += LR"(\SpaceCalibrator)";
 		if (CreateDirectoryW(path.c_str(), 0) == 0 && GetLastError() != ERROR_ALREADY_EXISTS) {
 			return false;
 		}

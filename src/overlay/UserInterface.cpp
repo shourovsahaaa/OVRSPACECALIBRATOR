@@ -45,7 +45,7 @@ void BuildMainWindow(bool runningInOverlay_)
 	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
 
-	if (!ImGui::Begin("OpenVRSpaceCalibrator", nullptr, bareWindowFlags))
+	if (!ImGui::Begin("SpaceCalibrator", nullptr, bareWindowFlags))
 	{
 		ImGui::End();
 		return;
@@ -78,7 +78,7 @@ void ShowVersionLine() {
 		ImGui::EndChild();
 		return;
 	}
-	ImGui::Text("OpenVR Space Calibrator v" SPACECAL_VERSION_STRING);
+	ImGui::Text("Space Calibrator v" SPACECAL_VERSION_STRING);
 	if (runningInOverlay)
 	{
 		ImGui::SameLine();

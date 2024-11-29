@@ -34,7 +34,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
     enable_language("RC")
-    set (WIN32_RESOURCES ${CMAKE_SOURCE_DIR}/src/overlay/OpenVR-SpaceCalibrator.rc)
+    set (WIN32_RESOURCES ${CMAKE_SOURCE_DIR}/src/overlay/SpaceCalibrator.rc)
 endif()
 
 # Add source files
@@ -101,12 +101,20 @@ add_custom_command(
     ${CMAKE_BINARY_DIR}/artifacts/$<CONFIG>/manifest.vrmanifest
 )
 
-# Copy icon
+# Copy dashboard icon
 add_custom_command(
     TARGET SpaceCalibratorOverlay POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy
     ${CMAKE_SOURCE_DIR}/src/overlay/icon.png
     ${CMAKE_BINARY_DIR}/artifacts/$<CONFIG>/icon.png
+)
+
+# Copy taskbar icon
+add_custom_command(
+    TARGET SpaceCalibratorOverlay POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_SOURCE_DIR}/src/overlay/taskbar_icon.png
+    ${CMAKE_BINARY_DIR}/artifacts/$<CONFIG>/taskbar_icon.png
 )
 
 # Copy LICENSE
