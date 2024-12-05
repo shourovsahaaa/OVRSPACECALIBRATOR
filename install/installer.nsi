@@ -106,12 +106,14 @@ Section "Install" SecInstall
 	afterupgrade:
 
 	SetOutPath "$INSTDIR"
-
+	
 	File "${ARTIFACTS_BASEDIR}\LICENSE"
+	File "${ARTIFACTS_BASEDIR}\README"
 	File "${ARTIFACTS_BASEDIR}\SpaceCalibrator.exe"
 	File "${ARTIFACTS_BASEDIR}\openvr_api.dll"
 	File "${ARTIFACTS_BASEDIR}\manifest.vrmanifest"
 	File "${ARTIFACTS_BASEDIR}\icon.png"
+	File "${ARTIFACTS_BASEDIR}\taskbar_icon.png"
 
 	ExecWait '"$INSTDIR\vcredist_x64.exe" /install /quiet'
 	
@@ -186,12 +188,14 @@ Section "Uninstall"
 	RMdir "$vrRuntimePath2\drivers\01spacecalibrator\bin\win64\"
 	RMdir "$vrRuntimePath2\drivers\01spacecalibrator\bin\"
 	RMdir "$vrRuntimePath2\drivers\01spacecalibrator\"
-
+	
 	Delete "$INSTDIR\LICENSE"
+	Delete "$INSTDIR\README"
 	Delete "$INSTDIR\SpaceCalibrator.exe"
 	Delete "$INSTDIR\openvr_api.dll"
 	Delete "$INSTDIR\manifest.vrmanifest"
 	Delete "$INSTDIR\icon.png"
+	Delete "$INSTDIR\taskbar_icon.png"
 	
 	DeleteRegKey HKLM "Software\SpaceCalibrator\Main"
 	DeleteRegKey HKLM "Software\SpaceCalibrator\Driver"
