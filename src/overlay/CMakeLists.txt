@@ -125,6 +125,14 @@ add_custom_command(
     ${CMAKE_BINARY_DIR}/artifacts/$<CONFIG>/LICENSE
 )
 
+# Copy NOTICE
+add_custom_command(
+    TARGET SpaceCalibratorOverlay POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy
+    ${CMAKE_SOURCE_DIR}/NOTICE
+    ${CMAKE_BINARY_DIR}/artifacts/$<CONFIG>/README
+)
+
 # Copy openvr_api.dll
 add_custom_command(
     TARGET SpaceCalibratorOverlay POST_BUILD
