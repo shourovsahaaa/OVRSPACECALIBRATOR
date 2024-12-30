@@ -827,6 +827,7 @@ void BuildDeviceSelection(const VRState &state, int &initialSelected, const std:
 		}
 	}
 
+	uint64_t iterator = 0;
 	if (selected == -1 && standby) {
 		bool present = false;
 		for (auto& device : state.devices)
@@ -843,9 +844,15 @@ void BuildDeviceSelection(const VRState &state, int &initialSelected, const std:
 
 		if (!present) {
 			auto label = LabelString(standbyDevice);
+			std::string uniqueId = label + "_pass0_" + std::to_string(iterator);
+			iterator++;
+			ImGui::PushID(uniqueId.c_str());
 			ImGui::Selectable(label.c_str(), true);
+			ImGui::PopID();
 		}
 	}
+
+	iterator = 0;
 
 	for (auto &device : state.devices)
 	{
@@ -853,9 +860,13 @@ void BuildDeviceSelection(const VRState &state, int &initialSelected, const std:
 			continue;
 
 		auto label = LabelString(device);
+		std::string uniqueId = label + "_pass1_" + std::to_string(iterator);
+		iterator++;
+		ImGui::PushID(uniqueId.c_str());
 		if (ImGui::Selectable(label.c_str(), selected == device.id)) {
 			selected = device.id;
 		}
+		ImGui::PopID();
 	}
 	if (selected != initialSelected) {
 		const auto& device = std::find_if(state.devices.begin(), state.devices.end(), [&](const auto& d) { return d.id == selected; });
