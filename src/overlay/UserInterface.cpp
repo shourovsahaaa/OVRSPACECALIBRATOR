@@ -383,12 +383,12 @@ void DrawVectorElement(const std::string id, const char* text, double* value, in
 	}
 }
 
-std::string GetPrettyTrackingSystemName(const std::string& value) {
+inline const char* GetPrettyTrackingSystemName(const std::string& value) {
 	// To comply with SteamVR branding guidelines (page 29), we rename devices under lighthouse tracking to SteamVR Tracking.
 	if (value == "lighthouse" || value == "aapvr") {
 		return "SteamVR Tracking";
 	}
-	return value;
+	return value.c_str();
 }
 
 void CCal_BasicInfo() {
@@ -397,14 +397,14 @@ void CCal_BasicInfo() {
 		ImGui::TableSetupColumn("Target device");
 		ImGui::TableHeadersRow();
 
-		std::string refTrackingSystem = GetPrettyTrackingSystemName(CalCtx.referenceStandby.trackingSystem);
-		std::string targetTrackingSystem = GetPrettyTrackingSystemName(CalCtx.targetStandby.trackingSystem);
+		const char* refTrackingSystem = GetPrettyTrackingSystemName(CalCtx.referenceStandby.trackingSystem);
+		const char* targetTrackingSystem = GetPrettyTrackingSystemName(CalCtx.targetStandby.trackingSystem);
 
 		ImGui::TableNextRow();
 		ImGui::TableSetColumnIndex(0);
 		ImGui::BeginGroup();
 		ImGui::Text("%s / %s / %s",
-			refTrackingSystem.c_str(),
+			refTrackingSystem,
 			CalCtx.referenceStandby.model.c_str(),
 			CalCtx.referenceStandby.serial.c_str()
 		);
@@ -424,7 +424,7 @@ void CCal_BasicInfo() {
 		ImGui::TableSetColumnIndex(1);
 		ImGui::BeginGroup();
 		ImGui::Text("%s / %s / %s",
-			targetTrackingSystem.c_str(),
+			targetTrackingSystem,
 			CalCtx.targetStandby.model.c_str(),
 			CalCtx.targetStandby.serial.c_str()
 		);
@@ -505,7 +505,7 @@ void BuildMenu(bool runningInOverlay)
 	{
 		if (CalCtx.validProfile && !CalCtx.enabled)
 		{
-			ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1), "Reference (%s) HMD not detected, profile disabled", GetPrettyTrackingSystemName(CalCtx.referenceTrackingSystem.c_str()));
+			ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1), "Reference (%s) HMD not detected, profile disabled", GetPrettyTrackingSystemName(CalCtx.referenceTrackingSystem));
 			ImGui::Text("");
 		}
 
@@ -662,7 +662,7 @@ void BuildSystemSelection(const VRState &state)
 
 	std::vector<const char *> referenceSystems;
 	std::vector<const char *> referenceSystemsUi;
-	for (auto &str : state.trackingSystems)
+	for (const std::string& str : state.trackingSystems)
 	{
 		if (str == CalCtx.referenceTrackingSystem)
 		{
@@ -673,7 +673,7 @@ void BuildSystemSelection(const VRState &state)
 			firstReferenceSystemNotTargetSystem = (int) referenceSystems.size();
 		}
 		referenceSystems.push_back(str.c_str());
-		referenceSystemsUi.push_back(GetPrettyTrackingSystemName(str).c_str());
+		referenceSystemsUi.push_back(GetPrettyTrackingSystemName(str));
 	}
 
 	if (currentReferenceSystem == -1 && CalCtx.referenceTrackingSystem == "")
@@ -713,14 +713,14 @@ void BuildSystemSelection(const VRState &state)
 
 	std::vector<const char *> targetSystems;
 	std::vector<const char *> targetSystemsUi;
-	for (auto &str : state.trackingSystems)
+	for (const std::string& str : state.trackingSystems)
 	{
 		if (str != CalCtx.referenceTrackingSystem)
 		{
 			if (str != "" && str == CalCtx.targetTrackingSystem)
 				currentTargetSystem = (int) targetSystems.size();
 			targetSystems.push_back(str.c_str());
-			targetSystemsUi.push_back(GetPrettyTrackingSystemName(str).c_str());
+			targetSystemsUi.push_back(GetPrettyTrackingSystemName(str));
 		}
 	}
 
@@ -775,7 +775,7 @@ std::string LabelString(const StandbyDevice& device) {
 void BuildDeviceSelection(const VRState &state, int &initialSelected, const std::string &system, StandbyDevice &standbyDevice)
 {
 	int selected = initialSelected;
-	ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "Devices from: %s", GetPrettyTrackingSystemName(system).c_str());
+	ImGui::TextColored(ImVec4(0.5f, 0.5f, 0.5f, 1), "Devices from: %s", GetPrettyTrackingSystemName(system));
 
 	if (selected != -1)
 	{
