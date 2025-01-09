@@ -429,6 +429,23 @@ void RunLoop()
 	}
 }
 
+void VerifySetupCorrect() {
+	if (!vr::VRApplications()->IsApplicationInstalled(OPENVR_APPLICATION_KEY)) {
+		std::string manifestPath = std::format("{}\\{}", cwd, "manifest.vrmanifest");
+		std::cout << "Adding manifest path: " << manifestPath << std::endl;
+		// If manifest is not installed, try installing it, and set it to auto-start with SteamVR
+		auto vrAppErr = vr::VRApplications()->AddApplicationManifest(manifestPath.c_str());
+		if (vrAppErr != vr::VRApplicationError_None) {
+			fprintf(stderr, "Failed to add manifest: %s\n", vr::VRApplications()->GetApplicationsErrorNameFromEnum(vrAppErr));
+		} else {
+			vr::VRApplications()->SetApplicationAutoLaunch(OPENVR_APPLICATION_KEY, true);
+		}
+	} else {
+		// Application is already registered, do not alter settings
+		std::cout << "Space Calibrator already registered with SteamVR. Skipping..." << std::endl;
+	}
+}
+
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 {
 	if (_getcwd(cwd, MAX_PATH) == nullptr) {
@@ -450,6 +467,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	try {
 		InitVR();
+		VerifySetupCorrect();
 		CreateGLFWWindow();
 		InitCalibrator();
 		LoadProfile(CalCtx);
