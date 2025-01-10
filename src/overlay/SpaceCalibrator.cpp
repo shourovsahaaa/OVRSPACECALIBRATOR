@@ -27,6 +27,10 @@ name='Microsoft.Windows.Common-Controls' version='6.0.0.0' \
 processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #define OPENVR_APPLICATION_KEY "pushrax.SpaceCalibrator"
+std::string c_SPACE_CALIBRATOR_STEAM_APP_ID = "3368750";
+std::string c_STEAMVR_STEAM_APP_ID = "250820";
+constexpr const char* STEAM_MUTEX_KEY = "Global\\MUTEX__SpaceCalibrator_Steam";
+HANDLE hSteamMutex = INVALID_HANDLE_VALUE;
 
 extern "C" __declspec(dllexport) DWORD NvOptimusEnablement = 0x00000001;
 extern "C" __declspec(dllexport) DWORD AmdPowerXpressRequestHighPerformance = 0x00000001;
@@ -152,22 +156,18 @@ void CreateGLFWWindow()
 	}
 }
 
-void TryCreateVROverlay()
-{
+void TryCreateVROverlay() {
 	if (overlayMainHandle || !vr::VROverlay())
 		return;
 
 	vr::VROverlayError error = vr::VROverlay()->CreateDashboardOverlay(
-		"pushrax.SpaceCalibrator", "Space Cal",
+		OPENVR_APPLICATION_KEY, "Space Calibrator",
 		&overlayMainHandle, &overlayThumbnailHandle
 	);
 
-	if (error == vr::VROverlayError_KeyInUse)
-	{
+	if (error == vr::VROverlayError_KeyInUse) {
 		throw std::runtime_error("Another instance of Space Calibrator is already running");
-	}
-	else if (error != vr::VROverlayError_None)
-	{
+	} else if (error != vr::VROverlayError_None) {
 		throw std::runtime_error("Error creating VR overlay: " + std::string(vr::VROverlay()->GetOverlayErrorNameFromEnum(error)));
 	}
 
@@ -216,22 +216,16 @@ void InitVR()
 {
 	auto initError = vr::VRInitError_None;
 	vr::VR_Init(&initError, vr::VRApplication_Overlay);
-	if (initError != vr::VRInitError_None)
-	{
+	if (initError != vr::VRInitError_None) {
 		auto error = vr::VR_GetVRInitErrorAsEnglishDescription(initError);
 		throw std::runtime_error("OpenVR error:" + std::string(error));
 	}
 
-	if (!vr::VR_IsInterfaceVersionValid(vr::IVRSystem_Version))
-	{
+	if (!vr::VR_IsInterfaceVersionValid(vr::IVRSystem_Version)) {
 		throw std::runtime_error("OpenVR error: Outdated IVRSystem_Version");
-	}
-	else if (!vr::VR_IsInterfaceVersionValid(vr::IVRSettings_Version))
-	{
+	} else if (!vr::VR_IsInterfaceVersionValid(vr::IVRSettings_Version)) {
 		throw std::runtime_error("OpenVR error: Outdated IVRSettings_Version");
-	}
-	else if (!vr::VR_IsInterfaceVersionValid(vr::IVROverlay_Version))
-	{
+	} else if (!vr::VR_IsInterfaceVersionValid(vr::IVROverlay_Version)) {
 		throw std::runtime_error("OpenVR error: Outdated IVROverlay_Version");
 	}
 
@@ -246,12 +240,10 @@ void RequestImmediateRedraw() {
 }
 
 double lastFrameStartTime = glfwGetTime();
-void RunLoop()
-{
+void RunLoop() {
 	while (!glfwWindowShouldClose(glfwWindow))
 	{
 		TryCreateVROverlay();
-
 		double time = glfwGetTime();
 		CalibrationTick(time);
 
@@ -465,6 +457,27 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 
 	glfwSetErrorCallback(GLFWErrorCallback);
 
+	char steamAppId[256] = {};
+	DWORD result = GetEnvironmentVariableA("SteamAppId", steamAppId, sizeof(steamAppId));
+	if (result > 0 && steamAppId != nullptr) {
+		if (c_SPACE_CALIBRATOR_STEAM_APP_ID == steamAppId ||
+			c_STEAMVR_STEAM_APP_ID == steamAppId) {
+			// We got launched via the Steam client UI.
+			hSteamMutex = CreateMutexA(NULL, FALSE, STEAM_MUTEX_KEY);
+			if (hSteamMutex == nullptr) {
+				hSteamMutex = INVALID_HANDLE_VALUE;
+			}
+			else {
+				// mutex opened, check if we opened one, if so exit
+				if (GetLastError() == ERROR_ALREADY_EXISTS) {
+					CloseHandle(hSteamMutex);
+					hSteamMutex = INVALID_HANDLE_VALUE;
+					return 0;
+				}
+			}
+		}
+	}
+
 	try {
 		InitVR();
 		VerifySetupCorrect();
@@ -492,6 +505,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance
 		wchar_t message[1024];
 		swprintf(message, 1024, L"%hs", e.what());
 		MessageBox(nullptr, message, L"Runtime Error", 0);
+	}
+
+	if (hSteamMutex != INVALID_HANDLE_VALUE && hSteamMutex != nullptr) {
+		CloseHandle(hSteamMutex);
+		hSteamMutex = nullptr;
 	}
 
 	if (glfwWindow)
