@@ -39,8 +39,8 @@ void BuildMainWindow(bool runningInOverlay_)
 {
 	runningInOverlay = runningInOverlay_;
 	bool continuousCalibration = CalCtx.state == CalibrationState::Continuous || CalCtx.state == CalibrationState::ContinuousStandby;
-	
-	auto &io = ImGui::GetIO();
+
+	auto& io = ImGui::GetIO();
 
 	ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f), ImGuiCond_Always);
 	ImGui::SetNextWindowSize(io.DisplaySize, ImGuiCond_Always);
