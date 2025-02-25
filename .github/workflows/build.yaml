@@ -1,0 +1,51 @@
+name: Build NSIS Installer
+
+on:
+  push:
+    branches:
+      - develop
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        with:
+          submodules: 'true'
+
+      - name: Define variables (PR)
+        if: github.event_name == 'pull_request'
+        id: set-pr-sha
+        shell: bash
+        run: echo "SHORT_PR_SHA=$(git rev-parse HEAD | cut -c 1-7)" >> "$GITHUB_OUTPUT"
+
+      - name: Chocolatey - Install Ninja
+        uses: crazy-max/ghaction-chocolatey@v3
+        with:
+          args: install ninja
+
+      - name: Generate Ninja files
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          GenWin64.bat
+
+      - name: Build SpaceCalibrator
+        shell: cmd
+        run: |
+          call "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build\vcvars64.bat"
+          BuildWin64.bat
+
+      - name: Build Installer
+        run: makensis install/installer.nsi
+
+      - name: Upload Installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: "SpaceCalibrator-packed-${{ steps.set-pr-sha.outputs.SHORT_PR_SHA || github.ref_name }}"
+          path: install/SpaceCalibrator.exe

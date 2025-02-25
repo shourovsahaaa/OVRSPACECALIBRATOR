@@ -106,10 +106,11 @@ Section "Install" SecInstall
 	afterupgrade:
 
 	SetOutPath "$INSTDIR"
-	
+
+	File "${ARTIFACTS_BASEDIR}\..\SpaceCalibrator.exe"
+
 	File "${ARTIFACTS_BASEDIR}\LICENSE"
 	File "${ARTIFACTS_BASEDIR}\README"
-	File "${ARTIFACTS_BASEDIR}\SpaceCalibrator.exe"
 	File "${ARTIFACTS_BASEDIR}\openvr_api.dll"
 	File "${ARTIFACTS_BASEDIR}\manifest.vrmanifest"
 	File "${ARTIFACTS_BASEDIR}\icon.png"
